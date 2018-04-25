@@ -40,4 +40,7 @@ dependencies {
 //    implementation files('/Users/adam/Downloads/epublib-core-latest.jar')
 
     implementation 'com.folioreader:folioreader:0.3.4'
+
+    implementation 'com.github.kittinunf.fuel:fuel-android:1.12.1'
+    implementation 'com.github.kittinunf.fuel:fuel-gson:1.12.1'
 }

@@ -7,11 +7,13 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.TextView
 import com.folioreader.util.FolioReader
 import java.io.IOException
 import android.widget.Toast
 import com.fasterxml.jackson.core.type.TypeReference
+import com.fasterxml.jackson.databind.JavaType
 import com.folioreader.model.HighLight
 import com.folioreader.ui.base.OnSaveHighlight
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -23,18 +25,21 @@ import com.folioreader.util.LastReadStateCallback
 import com.folioreader.util.OnHighlightListener
 
 
-class MainActivity : AppCompatActivity(), LastReadStateCallback {
+class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityView {
     private val TAG = MainActivity::class.java.simpleName
     private var folioReader: FolioReader? = null
     lateinit var prefs: SharedPreferences
     lateinit var defaultTextView: TextView
     lateinit var token: String
     lateinit var username: String
+    lateinit var presenter: MainActivityPresenter
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        presenter = MainActivityPresenter(this)
 
         prefs = this.getSharedPreferences(this.packageName + "_preferences", 0)
         defaultTextView = this.findViewById<TextView>(R.id.defaultTextView)
@@ -144,17 +149,19 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback {
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.settings -> {
             // Open the Settings fragment.
-            fragmentManager.beginTransaction()
-                    .addToBackStack("Settings")
-                    .replace(android.R.id.content, SettingsFragment())
-                    .commit()
+//            fragmentManager.beginTransaction()
+//                    .addToBackStack("Settings")
+//                    .replace(android.R.id.content, SettingsFragment())
+//                    .commit()
+            presenter.openSettingsFragment()
             true
         }
         R.id.login -> {
             // Open the LoginActivity.
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.putExtra("loginType", "photos");
-            startActivityForResult(intent, 100)
+//            val intent = Intent(this, LoginActivity::class.java)
+//            intent.putExtra("loginType", "photos");
+//            startActivityForResult(intent, 100)
+            presenter.launchLoginActivity(LoginActivity::class.java)
             true
         }
 
@@ -172,6 +179,10 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback {
         else -> {
             super.onOptionsItemSelected(item)
         }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+        invalidateOptionsMenu()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -194,5 +205,18 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback {
         }
 
         return super.onCreateOptionsMenu(menu)
+    }
+
+    override fun openSettingsFragment() {
+        fragmentManager.beginTransaction()
+                .addToBackStack("Settings")
+                .replace(android.R.id.content, SettingsFragment())
+                .commit()
+    }
+
+    override fun launchLoginActivity(activity: Class<LoginActivity>) {
+        val intent = Intent(this, activity)
+        intent.putExtra("loginType", "photos");
+        startActivityForResult(intent, 100)
     }
 }
