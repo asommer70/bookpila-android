@@ -1,8 +1,13 @@
 package com.thehoick.bookpila
 
+import android.content.Intent
+import android.content.SharedPreferences
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.TextView
 import com.folioreader.util.FolioReader
 import java.io.IOException
 import android.widget.Toast
@@ -21,20 +26,30 @@ import com.folioreader.util.OnHighlightListener
 class MainActivity : AppCompatActivity(), LastReadStateCallback {
     private val TAG = MainActivity::class.java.simpleName
     private var folioReader: FolioReader? = null
+    lateinit var prefs: SharedPreferences
+    lateinit var defaultTextView: TextView
+    lateinit var token: String
+    lateinit var username: String
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        folioReader = FolioReader(this)
-//        folioReader?.registerHighlightListener(this);
-        folioReader?.setLastReadStateCallback(this);
+        prefs = this.getSharedPreferences(this.packageName + "_preferences", 0)
+        defaultTextView = this.findViewById<TextView>(R.id.defaultTextView)
+//        addPreferencesFromResource(R.xml.fragment_preference);
 
-        folioReader?.openBook("file:///android_asset/books/TheSilverChair.epub");
 
-        getHighlightsAndSave();
-        getLastReadPositionAndSave();
+
+//        folioReader = FolioReader(this)
+////        folioReader?.registerHighlightListener(this);
+//        folioReader?.setLastReadStateCallback(this);
+//
+//        folioReader?.openBook("file:///android_asset/books/TheSilverChair.epub");
+//
+//        getHighlightsAndSave();
+//        getLastReadPositionAndSave();
     }
 
     private fun getLastReadPositionAndSave() {
@@ -124,5 +139,60 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback {
         Toast.makeText(this,
                 "highlight id = " + highlight.uuid + " type = " + type,
                 Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
+        R.id.settings -> {
+            // Open the Settings fragment.
+            fragmentManager.beginTransaction()
+                    .addToBackStack("Settings")
+                    .replace(android.R.id.content, SettingsFragment())
+                    .commit()
+            true
+        }
+        R.id.login -> {
+            // Open the LoginActivity.
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.putExtra("loginType", "photos");
+            startActivityForResult(intent, 100)
+            true
+        }
+
+        R.id.logout -> {
+            // Clear token, user_id, and username from SharedPrefs, and finish the Activity.
+            val editor = prefs.edit()
+            editor.putString("username", null)
+            editor.putString("token", null)
+            editor.putInt("user_id", 0)
+            editor.apply()
+            finish()
+            true
+        }
+
+        else -> {
+            super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        val inflater = menuInflater
+        inflater.inflate(R.menu.main, menu)
+
+        token = prefs.getString("token", "")
+        username = prefs.getString("username", "")
+
+        // Add welcome message to the menu and logout item if token and username SharedPrefs are set.
+        if (!token.equals("") && !username.equals("")) {
+            menu.clear()
+            menu.add(0, R.id.username, Menu.NONE, "Welcome, " + username)
+            menu.add(0, R.id.logout, Menu.NONE, "Logout")
+            menu.add(0, R.id.settings, Menu.NONE, "Settings")
+        } else {
+            menu.removeItem(R.id.username)
+            menu.removeItem(R.id.logout)
+        }
+
+        return super.onCreateOptionsMenu(menu)
     }
 }
