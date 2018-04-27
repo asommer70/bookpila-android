@@ -7,8 +7,10 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import android.view.LayoutInflater
+import com.bumptech.glide.Glide
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.coroutines.experimental.coroutineContext
 
 
 class BookViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView) {
@@ -25,17 +27,17 @@ class BookViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView) {
     }
 }
 
-class BooksAdapter(): RecyclerView.Adapter<BookViewHolder>() {
+class BooksAdapter(books: JSONArray): RecyclerView.Adapter<BookViewHolder>() {
     val TAG = BooksAdapter::class.java.simpleName
     var bookList: JSONArray? = null
 
     init {
-//        bookList = books
+        bookList = books
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder {
         val itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.book, parent, false)
-
+        Log.d(TAG, "onCreateViewHolder... ")
         return BookViewHolder(itemView)
     }
 
@@ -45,6 +47,11 @@ class BooksAdapter(): RecyclerView.Adapter<BookViewHolder>() {
         holder.title?.text = book.get("title").toString()
         holder.about?.text = book.get("about").toString()
         holder.author?.text = book.get("author").toString()
+
+        val cover = book.get("cover").toString()
+        val coverImage = book.get("cover_image").toString()
+        Glide.with(holder.itemView.context).load(book.get("cover_url")).into(holder.cover!!)
+
 
 //        holder.about?.text = book.about
 //        holder.author?.text = book.author

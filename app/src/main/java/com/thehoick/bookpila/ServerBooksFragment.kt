@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.FloatingActionButton
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
@@ -24,26 +25,12 @@ import org.json.JSONArray
 
 class ServerBooksFragment: Fragment() {
     val TAG = ServerBooksFragment::class.java.simpleName
-    lateinit var booksAdapter: BooksAdapter
+    var booksAdapter: BooksAdapter? = null
 //    lateinit var booksList: RecyclerView
     lateinit var books: JSONArray
 
     fun getBooks() {
-        val prefs = activity.getSharedPreferences(activity.packageName + "_preferences", 0)
-        val url = prefs.getString("url", "")
-        val token = prefs.getString("token", "")
-        Log.d(TAG, "getBooks token: $token")
 
-        FuelManager.instance.baseHeaders = mapOf("Authorization" to "Token " + token)
-
-        // HTTP GET /api/books
-        Fuel.get(url + "/api/books").responseJson { request, response, result ->
-            Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
-//            Log.d(TAG, "result.get().obj().get(results).class: ${result.get().obj().get("results").javaClass}")
-            books = result.get().obj().get("results") as JSONArray
-            booksAdapter.bookList = books
-//            return result.get().obj().get("resutls")
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -57,12 +44,33 @@ class ServerBooksFragment: Fragment() {
 //        }
 
 //        booksAdapter = BooksAdapter(getBooks(view))
-        getBooks()
+//        getBooks()
 
-        val booksList = view.findViewById<RecyclerView>(R.id.booksList)
-        booksAdapter = BooksAdapter()
-        booksList.adapter = booksAdapter
-        Log.d(TAG, "booksAdapter: $booksAdapter")
+        val message = view.findViewById<TextView>(R.id.defaultTextView)
+        message.setText("ServerBooksFragment...")
+
+        val prefs = activity.getSharedPreferences(activity.packageName + "_preferences", 0)
+        val url = prefs.getString("url", "")
+        val token = prefs.getString("token", "")
+        Log.d(TAG, "getBooks token: $token url: $url")
+
+        FuelManager.instance.baseHeaders = mapOf("Authorization" to "Token " + token)
+
+        // HTTP GET /api/books
+        Fuel.get(url + "/api/books").responseJson { request, response, result ->
+            Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
+//            Log.d(TAG, "result.get().obj().get(results).class: ${result.get().obj().get("results").javaClass}")
+            books = result.get().obj().get("results") as JSONArray
+//            booksAdapter?.bookList = books
+
+            val booksList = view.findViewById<RecyclerView>(R.id.booksList)
+            booksAdapter = BooksAdapter(books)
+            booksList.setLayoutManager(LinearLayoutManager(context));
+
+            booksList.adapter = booksAdapter
+            Log.d(TAG, "booksAdapter: $booksAdapter")
+        }
+
 
         return view
     }
