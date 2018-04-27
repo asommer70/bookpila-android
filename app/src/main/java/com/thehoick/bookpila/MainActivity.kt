@@ -23,6 +23,11 @@ import java.io.InputStreamReader
 //import com.folioreader.util.FolioReader
 import com.folioreader.util.LastReadStateCallback
 import com.folioreader.util.OnHighlightListener
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.android.extension.responseJson
+import com.github.kittinunf.fuel.core.FuelManager
+import org.json.JSONArray
+import org.json.JSONObject
 
 
 class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityView {
@@ -43,9 +48,39 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
 
         prefs = this.getSharedPreferences(this.packageName + "_preferences", 0)
         defaultTextView = this.findViewById<TextView>(R.id.defaultTextView)
-//        addPreferencesFromResource(R.xml.fragment_preference);
 
+        token = prefs.getString("token", "")
+        if (token.isEmpty()) {
+            // Open the LoginActivity.
+            val intent = Intent(this, LoginActivity::class.java)
+            intent.putExtra("loginType", "books");
+            startActivityForResult(intent, 200)
 
+            val needToLoginFragment = NeedToLoginFragment()
+            val fragmentTransaction = fragmentManager.beginTransaction()
+            fragmentTransaction.replace(R.id.container, needToLoginFragment, "needtologin_fragment")
+            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
+        } else {
+            val booksFragment = ServerBooksFragment()
+            val fragmentTransaction = fragmentManager.beginTransaction()
+
+            fragmentTransaction.replace(R.id.container, booksFragment, "books_fragment")
+            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
+        }
+
+//        getBooks()
+
+        // HTTP GET /api/books
+//        val url = prefs.getString("url", "")
+//        Log.d(TAG, "url: $url")
+//        Fuel.get(url + "/api/books").responseString { request, response, result ->
+////            Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
+////            Log.d(TAG, "result.get().obj().get(results).class: ${result.get().obj().get("results").javaClass}")
+//            Log.d(TAG, "result: ${result}")
+////            return result.get().obj().get("resutls")
+//        }
 
 //        folioReader = FolioReader(this)
 ////        folioReader?.registerHighlightListener(this);
@@ -55,6 +90,32 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
 //
 //        getHighlightsAndSave();
 //        getLastReadPositionAndSave();
+    }
+
+    fun getBooks() {
+//        val prefs = activity.getSharedPreferences(activity.packageName + "_preferences", 0)
+        val url = prefs.getString("url", "")
+//        val token = prefs.getString("token", "")
+        Log.d(TAG, "getBooks token: $token")
+        Log.d(TAG, "getBooks url: $url")
+
+        FuelManager.instance.baseHeaders = mapOf("Authorization" to "Token " + token)
+
+        // HTTP GET /api/books
+        Fuel.get(url + "/api/books").responseJson { request, response, result ->
+            Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
+            Log.d(TAG, "result.get().obj().get(results).class: ${result.get().obj().get("results").javaClass}")
+            val books = result.get().obj().get("results") as JSONArray
+            val book = books[0] as JSONObject
+
+            Log.d(TAG, "book: ${book.get("title")}")
+//            for (i in 0..(books.length() - 1)) {
+//                val book = books.getJSONObject(i)
+//                // Your code here
+//            }
+
+//            return result.get().obj().get("resutls")
+        }
     }
 
     private fun getLastReadPositionAndSave() {

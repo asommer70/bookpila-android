@@ -43,4 +43,5 @@ dependencies {
 
     implementation 'com.github.kittinunf.fuel:fuel-android:1.12.1'
     implementation 'com.github.kittinunf.fuel:fuel-gson:1.12.1'
+    testImplementation 'org.mockito:mockito-core:2.18.3'
 }
