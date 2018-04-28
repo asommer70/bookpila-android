@@ -45,8 +45,8 @@ class BooksAdapter(books: JSONArray): RecyclerView.Adapter<BookViewHolder>() {
         val book = bookList!!.get(position) as JSONObject
         Log.d(TAG, "onBindViewHolder book.title ${book.get("title")}")
         holder.title?.text = book.get("title").toString()
-        holder.about?.text = book.get("about").toString()
-        holder.author?.text = book.get("author").toString()
+        holder.author?.text = "Author: ${book.get("author").toString()}"
+        holder.about?.text = "About:\n ${book.get("about").toString()}"
 
         val cover = book.get("cover").toString()
         val coverImage = book.get("cover_image").toString()
