@@ -57,13 +57,13 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
             startActivityForResult(intent, 200)
 
             val needToLoginFragment = NeedToLoginFragment()
-            val fragmentTransaction = fragmentManager.beginTransaction()
+            val fragmentTransaction = this.fragmentManager.beginTransaction()
             fragmentTransaction.replace(R.id.container, needToLoginFragment, "needtologin_fragment")
             fragmentTransaction.addToBackStack(null)
             fragmentTransaction.commit()
         } else {
             val booksFragment = ServerBooksFragment()
-            val fragmentTransaction = fragmentManager.beginTransaction()
+            val fragmentTransaction = this.fragmentManager.beginTransaction()
 
             fragmentTransaction.replace(R.id.container, booksFragment, "books_fragment")
             fragmentTransaction.addToBackStack(null)
@@ -108,9 +108,9 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
             val books = result.get().obj().get("results") as JSONArray
             val book = books[0] as JSONObject
 
-            Log.d(TAG, "book: ${book.get("title")}")
+            Log.d(TAG, "item_book: ${book.get("title")}")
 //            for (i in 0..(books.length() - 1)) {
-//                val book = books.getJSONObject(i)
+//                val item_book = books.getJSONObject(i)
 //                // Your code here
 //            }
 

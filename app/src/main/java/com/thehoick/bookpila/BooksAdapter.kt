@@ -10,10 +10,13 @@ import android.view.LayoutInflater
 import com.bumptech.glide.Glide
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlin.coroutines.experimental.coroutineContext
+import android.app.Activity
+import android.os.Bundle
+import java.io.Serializable
 
 
 class BookViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView) {
+    val TAG = BookViewHolder::class.java.simpleName
     var title: TextView? = null
     var cover: ImageView? = null
     var author: TextView? = null
@@ -36,14 +39,29 @@ class BooksAdapter(books: JSONArray): RecyclerView.Adapter<BookViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder {
-        val itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.book, parent, false)
-        Log.d(TAG, "onCreateViewHolder... ")
+        val itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_book, parent, false)
+
+        itemView.setOnClickListener {
+            Log.d(TAG, "item_book...${bookList!![viewType]}")
+            val book = bookList!![viewType] as JSONObject
+            val bookFragment = BookFragment()
+            val manager = (itemView.context as Activity).fragmentManager
+            val fragmentTransaction = manager.beginTransaction()
+
+            val bundle = Bundle()
+            bundle.putString(bookFragment.book, book.toString())
+            bookFragment.arguments = bundle
+
+            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
+            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
+        }
+
         return BookViewHolder(itemView)
     }
 
     override fun onBindViewHolder(holder: BookViewHolder, position: Int) {
         val book = bookList!!.get(position) as JSONObject
-        Log.d(TAG, "onBindViewHolder book.title ${book.get("title")}")
         holder.title?.text = book.get("title").toString()
         holder.author?.text = "Author: ${book.get("author").toString()}"
         holder.about?.text = "About:\n ${book.get("about").toString()}"
@@ -51,11 +69,6 @@ class BooksAdapter(books: JSONArray): RecyclerView.Adapter<BookViewHolder>() {
         val cover = book.get("cover").toString()
         val coverImage = book.get("cover_image").toString()
         Glide.with(holder.itemView.context).load(book.get("cover_url")).into(holder.cover!!)
-
-
-//        holder.about?.text = book.about
-//        holder.author?.text = book.author
-//        holder.cover
     }
 
     override fun getItemCount(): Int {
