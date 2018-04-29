@@ -82,14 +82,7 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
 ////            return result.get().obj().get("resutls")
 //        }
 
-//        folioReader = FolioReader(this)
-////        folioReader?.registerHighlightListener(this);
-//        folioReader?.setLastReadStateCallback(this);
-//
-//        folioReader?.openBook("file:///android_asset/books/TheSilverChair.epub");
-//
-//        getHighlightsAndSave();
-//        getLastReadPositionAndSave();
+
     }
 
     fun getBooks() {
