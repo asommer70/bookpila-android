@@ -10,7 +10,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.github.kittinunf.fuel.Fuel
 import org.json.JSONObject
+import java.io.File
 
 class BookFragment(): Fragment() {
     val TAG = BookFragment::class.java.simpleName
@@ -18,6 +20,9 @@ class BookFragment(): Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater!!.inflate(R.layout.fragment_book, container, false)
+
+        val prefs = activity.getSharedPreferences(activity.packageName + "_preferences", 0)
+        val localDir = prefs.getString("local_dir", "")
 
         val bookString = arguments.getString(book)
         val book = JSONObject(bookString)
@@ -38,6 +43,17 @@ class BookFragment(): Fragment() {
 
         download.setOnClickListener {
             Log.d(TAG, "Download ${book.get("upload")}")
+
+            var fileName = book.get("upload").toString().split("/").last().split(".").first()
+            Log.d(TAG, "localDir: $localDir fileName: $fileName")
+
+            Fuel.download(book.get("upload").toString()).destination { response, url ->
+                File.createTempFile(fileName, ".epub", File(localDir))
+            }.response { req, res, result ->
+                Log.d(TAG, "file downloaded...")
+
+                // TODO:as save book data into a local SQL database.
+            }
         }
 
         read.setOnClickListener {
