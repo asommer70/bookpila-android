@@ -21,4 +21,6 @@
     <string name="please_login">Please sign in</string>
     <string name="download">Download</string>
     <string name="read">read</string>
+    <string name="localDirSelector">local_storage_dir</string>
+    <string name="new_folder">New folder</string>
 </resources>

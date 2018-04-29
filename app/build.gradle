@@ -46,7 +46,11 @@ dependencies {
 
     implementation 'com.github.kittinunf.fuel:fuel-android:1.12.1'
     implementation 'com.github.kittinunf.fuel:fuel-gson:1.12.1'
-    testImplementation 'org.mockito:mockito-core:2.18.3'
+//    implementation 'com.nononsenseapps:filepicker:4.1.0'
+
+//    testImplementation 'org.mockito:mockito-core:2.18.3'
+//    implementation 'com.leon:lfilepickerlibrary:1.7.0'
+    implementation 'com.github.angads25:filepicker:1.1.1'
 
     implementation 'com.github.bumptech.glide:glide:4.6.1'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.6.1'
@@ -54,4 +58,5 @@ dependencies {
     implementation('com.github.bumptech.glide:glide:4.6.1@aar') {
         transitive = true
     }
+
 }

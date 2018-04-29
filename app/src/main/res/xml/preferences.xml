@@ -5,4 +5,9 @@
         android:summary="URL for Book Pila! server."
         android:key="url"
         android:inputType="text"/>
+
+    <Preference android:title="Local Storage Directory"
+        android:key="@string/localDirSelector"
+        android:summary=""/>
+
 </PreferenceScreen>
