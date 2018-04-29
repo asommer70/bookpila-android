@@ -4,10 +4,13 @@ import android.content.Intent
 import android.content.SharedPreferences
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.View.VISIBLE
 import android.widget.TextView
 import com.folioreader.util.FolioReader
 import java.io.IOException
@@ -26,6 +29,7 @@ import com.folioreader.util.OnHighlightListener
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
+import com.thehoick.bookpila.models.BookPilaDataSource
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -50,25 +54,40 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
         defaultTextView = this.findViewById<TextView>(R.id.defaultTextView)
 
         token = prefs.getString("token", "")
-        if (token.isEmpty()) {
-            // Open the LoginActivity.
-            val intent = Intent(this, LoginActivity::class.java)
-            intent.putExtra("loginType", "books");
-            startActivityForResult(intent, 200)
 
-            val needToLoginFragment = NeedToLoginFragment()
-            val fragmentTransaction = this.fragmentManager.beginTransaction()
-            fragmentTransaction.replace(R.id.container, needToLoginFragment, "needtologin_fragment")
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
+        val dataSource = BookPilaDataSource(this)
+        val books = dataSource.getBooks()
+
+        if (books.size == 0) {
+            defaultTextView.visibility = VISIBLE
+            defaultTextView.text = getString(R.string.no_local_books)
         } else {
-            val booksFragment = ServerBooksFragment()
-            val fragmentTransaction = this.fragmentManager.beginTransaction()
-
-            fragmentTransaction.replace(R.id.container, booksFragment, "books_fragment")
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
+            val booksList = findViewById<RecyclerView>(R.id.booksList)
+            val booksAdapter = LocalBooksAdapter(books)
+            booksList.setLayoutManager(LinearLayoutManager(this))
+            booksList.adapter = booksAdapter
         }
+
+
+//        if (token.isEmpty()) {
+//            // Open the LoginActivity.
+//            val intent = Intent(this, LoginActivity::class.java)
+//            intent.putExtra("loginType", "books");
+//            startActivityForResult(intent, 200)
+//
+//            val needToLoginFragment = NeedToLoginFragment()
+//            val fragmentTransaction = this.fragmentManager.beginTransaction()
+//            fragmentTransaction.replace(R.id.container, needToLoginFragment, "needtologin_fragment")
+//            fragmentTransaction.addToBackStack(null)
+//            fragmentTransaction.commit()
+//        } else {
+//            val booksFragment = ServerBooksFragment()
+//            val fragmentTransaction = this.fragmentManager.beginTransaction()
+//
+//            fragmentTransaction.replace(R.id.container, booksFragment, "books_fragment")
+//            fragmentTransaction.addToBackStack(null)
+//            fragmentTransaction.commit()
+//        }
 
 //        getBooks()
 

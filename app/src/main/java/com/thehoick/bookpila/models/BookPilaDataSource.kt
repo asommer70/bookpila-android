@@ -3,6 +3,7 @@ package com.thehoick.bookpila.models
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
+import org.json.JSONArray
 import org.json.JSONObject
 
 
@@ -123,7 +124,7 @@ class BookPilaDataSource(context: Context) {
                 null
         )
 
-        var books = arrayListOf<Book>()
+        val books = arrayListOf<Book>()
         if (cursor.moveToFirst()) {
             do {
                 val book = Book(

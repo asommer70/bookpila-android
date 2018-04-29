@@ -65,7 +65,7 @@ class ServerBooksFragment: Fragment() {
 
             val booksList = view.findViewById<RecyclerView>(R.id.booksList)
             booksAdapter = BooksAdapter(books)
-            booksList.setLayoutManager(LinearLayoutManager(context));
+            booksList.setLayoutManager(LinearLayoutManager(context))
 
             booksList.adapter = booksAdapter
             Log.d(TAG, "booksAdapter: $booksAdapter")
