@@ -12,6 +12,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import android.app.Activity
 import android.os.Bundle
+import android.widget.LinearLayout
 import java.io.Serializable
 
 
@@ -41,21 +42,9 @@ class BooksAdapter(books: JSONArray): RecyclerView.Adapter<BookViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder {
         val itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_book, parent, false)
 
-        itemView.setOnClickListener {
-            Log.d(TAG, "item_book...${bookList!![viewType]}")
-            val book = bookList!![viewType] as JSONObject
-            val bookFragment = BookFragment()
-            val manager = (itemView.context as Activity).fragmentManager
-            val fragmentTransaction = manager.beginTransaction()
-
-            val bundle = Bundle()
-            bundle.putString(bookFragment.book, book.toString())
-            bookFragment.arguments = bundle
-
-            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
-        }
+//        itemView.setOnClickListener {
+//
+//        }
 
         return BookViewHolder(itemView)
     }
@@ -69,6 +58,20 @@ class BooksAdapter(books: JSONArray): RecyclerView.Adapter<BookViewHolder>() {
         val cover = book.get("cover").toString()
         val coverImage = book.get("cover_image").toString()
         Glide.with(holder.itemView.context).load(book.get("cover_url")).into(holder.cover!!)
+
+        holder.itemView.setOnClickListener {
+            val bookFragment = BookFragment()
+            val manager = (it.context as Activity).fragmentManager
+            val fragmentTransaction = manager.beginTransaction()
+
+            val bundle = Bundle()
+            bundle.putString(bookFragment.book, book.toString())
+            bookFragment.arguments = bundle
+
+            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
+            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
+        }
     }
 
     override fun getItemCount(): Int {

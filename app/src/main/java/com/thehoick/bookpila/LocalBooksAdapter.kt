@@ -37,23 +37,6 @@ class LocalBooksAdapter(books: List<Book>): RecyclerView.Adapter<LocalBookViewHo
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LocalBookViewHolder {
         val itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_book, parent, false)
-
-        itemView.setOnClickListener {
-            Log.d(TAG, "item_book...${bookList!![viewType]}")
-            val book = bookList!![viewType]
-            val bookFragment = BookFragment()
-            val manager = (itemView.context as Activity).fragmentManager
-            val fragmentTransaction = manager.beginTransaction()
-
-            val bundle = Bundle()
-            bundle.putString(bookFragment.book, book.toString())
-            bookFragment.arguments = bundle
-
-            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
-        }
-
         return LocalBookViewHolder(itemView)
     }
 
@@ -66,6 +49,20 @@ class LocalBooksAdapter(books: List<Book>): RecyclerView.Adapter<LocalBookViewHo
         val cover = book.cover
         val coverImage = book.cover_image
         Glide.with(holder.itemView.context).load(book.cover_url).into(holder.cover!!)
+
+        holder.itemView.setOnClickListener {
+            val bookFragment = BookFragment()
+            val manager = (it.context as Activity).fragmentManager
+            val fragmentTransaction = manager.beginTransaction()
+
+            val bundle = Bundle()
+            bundle.putString(bookFragment.book, book.toString())
+            bookFragment.arguments = bundle
+
+            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
+            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
+        }
     }
 
     override fun getItemCount(): Int {
