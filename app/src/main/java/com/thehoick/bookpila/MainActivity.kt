@@ -7,25 +7,19 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
+import android.view.*
 import android.view.View.VISIBLE
+import android.widget.Button
 import android.widget.TextView
 import com.folioreader.util.FolioReader
 import java.io.IOException
 import android.widget.Toast
-import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JavaType
 import com.folioreader.model.HighLight
-import com.folioreader.ui.base.OnSaveHighlight
-import com.fasterxml.jackson.databind.ObjectMapper
 import java.io.BufferedReader
 import java.io.InputStreamReader
 //import com.folioreader.util.
 //import com.folioreader.util.FolioReader
 import com.folioreader.util.LastReadStateCallback
-import com.folioreader.util.OnHighlightListener
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
@@ -42,7 +36,8 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
     lateinit var token: String
     lateinit var username: String
     lateinit var presenter: MainActivityPresenter
-
+    lateinit var booksFragment: ServerBooksFragment
+    private var currentActionMode: ActionMode? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -58,6 +53,8 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
         val dataSource = BookPilaDataSource(this)
         val books = dataSource.getBooks()
 
+//        startActionMode(modeCallBack)
+
         if (books.size == 0) {
             defaultTextView.visibility = VISIBLE
             defaultTextView.text = getString(R.string.no_local_books)
@@ -68,26 +65,46 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
             booksList.adapter = booksAdapter
         }
 
+        val serverBooksButton = findViewById<Button>(R.id.serverBooksButton)
+        serverBooksButton.setOnClickListener {
+            try {
+                if (token.isEmpty()) {
+                    // Open the LoginActivity.
+                    val intent = Intent(this, LoginActivity::class.java)
+                    intent.putExtra("loginType", "books");
+                    startActivityForResult(intent, 200)
 
-//        if (token.isEmpty()) {
-//            // Open the LoginActivity.
-//            val intent = Intent(this, LoginActivity::class.java)
-//            intent.putExtra("loginType", "books");
-//            startActivityForResult(intent, 200)
-//
-//            val needToLoginFragment = NeedToLoginFragment()
-//            val fragmentTransaction = this.fragmentManager.beginTransaction()
-//            fragmentTransaction.replace(R.id.container, needToLoginFragment, "needtologin_fragment")
-//            fragmentTransaction.addToBackStack(null)
-//            fragmentTransaction.commit()
-//        } else {
-//            val booksFragment = ServerBooksFragment()
-//            val fragmentTransaction = this.fragmentManager.beginTransaction()
-//
-//            fragmentTransaction.replace(R.id.container, booksFragment, "books_fragment")
-//            fragmentTransaction.addToBackStack(null)
-//            fragmentTransaction.commit()
-//        }
+                    val needToLoginFragment = NeedToLoginFragment()
+                    val fragmentTransaction = this.fragmentManager.beginTransaction()
+                    fragmentTransaction.replace(R.id.container, needToLoginFragment, "needtologin_fragment")
+                    fragmentTransaction.addToBackStack(null)
+                    fragmentTransaction.commit()
+                } else {
+                    booksFragment = ServerBooksFragment()
+                    val fragmentTransaction = this.fragmentManager.beginTransaction()
+
+                    fragmentTransaction.replace(R.id.container, booksFragment, "books_fragment")
+                    fragmentTransaction.addToBackStack(null)
+                    fragmentTransaction.commit()
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "e.message: ${e.message}")
+            }
+
+        }
+
+
+        val localBooksButton = findViewById<Button>(R.id.localBooksButton)
+        localBooksButton.setOnClickListener {
+            try {
+                if (booksFragment.isVisible) {
+                    Log.d(TAG, "booksFragment.isVisible(): ${booksFragment.isVisible()}")
+                    onBackPressed()
+                }
+            } catch (e: Exception) {
+                Log.d(TAG, "e.message: ${e.message}")
+            }
+        }
 
 //        getBooks()
 
@@ -291,5 +308,42 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
         val intent = Intent(this, activity)
         intent.putExtra("loginType", "photos");
         startActivityForResult(intent, 100)
+    }
+
+    private val modeCallBack = object : ActionMode.Callback {
+        // Called when the action mode is created; startActionMode() was called
+        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            mode.title = "Actions"
+            mode.menuInflater.inflate(R.menu.actions, menu)
+            return true
+        }
+
+        // Called each time the action mode is shown.
+        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+            return false // Return false if nothing is done
+        }
+
+        // Called when the user selects a contextual menu item
+        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
+            when (item.itemId) {
+                R.id.localBooks -> {
+                    Toast.makeText(this@MainActivity, "Local Books!", Toast.LENGTH_SHORT).show()
+                    mode.finish() // Action picked, so close the contextual menu
+                    return true
+                }
+                R.id.serverBooks -> {
+                    // Trigger the deletion here
+                    Toast.makeText(this@MainActivity, "Server Books!", Toast.LENGTH_SHORT).show()
+                    mode.finish() // Action picked, so close the contextual menu
+                    return true
+                }
+                else -> return false
+            }
+        }
+
+        // Called when the user exits the action mode
+        override fun onDestroyActionMode(mode: ActionMode) {
+            currentActionMode = null // Clear current action mode
+        }
     }
 }

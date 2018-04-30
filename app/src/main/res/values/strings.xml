@@ -24,4 +24,7 @@
     <string name="localDirSelector">local_storage_dir</string>
     <string name="new_folder">New folder</string>
     <string name="no_local_books">No local books... yet.</string>
+    <string name="local_books">Local Books</string>
+    <string name="server_books">Server Books</string>
+    <string name="getting_books">Getting books from server...</string>
 </resources>

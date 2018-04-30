@@ -11,22 +11,25 @@ import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
-import android.widget.GridView
-import android.widget.ProgressBar
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.result.Result
 import com.google.gson.JsonArray
+import kotlinx.android.synthetic.main.activity_main.*
 import nl.siegmann.epublib.epub.Main
 import org.json.JSONArray
+import java.net.ConnectException
 
 class ServerBooksFragment: Fragment() {
     val TAG = ServerBooksFragment::class.java.simpleName
     var booksAdapter: BooksAdapter? = null
 //    lateinit var booksList: RecyclerView
+    lateinit var message: TextView
     lateinit var books: JSONArray
 
     fun getBooks() {
@@ -46,8 +49,9 @@ class ServerBooksFragment: Fragment() {
 //        booksAdapter = BooksAdapter(getBooks(view))
 //        getBooks()
 
-        val message = view.findViewById<TextView>(R.id.defaultTextView)
-        message.setText("ServerBooksFragment...")
+        message = view.findViewById<TextView>(R.id.defaultTextView)
+        message.setText(getString(R.string.getting_books))
+        message.visibility = VISIBLE
 
         val prefs = activity.getSharedPreferences(activity.packageName + "_preferences", 0)
         val url = prefs.getString("url", "")
@@ -57,19 +61,44 @@ class ServerBooksFragment: Fragment() {
         FuelManager.instance.baseHeaders = mapOf("Authorization" to "Token " + token)
 
         // HTTP GET /api/books
-        Fuel.get(url + "/api/books").responseJson { request, response, result ->
-            Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
+        try {
+            Fuel.get(url + "/api/books").responseJson { request, response, result ->
+                Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
 //            Log.d(TAG, "result.get().obj().get(results).class: ${result.get().obj().get("results").javaClass}")
-            books = result.get().obj().get("results") as JSONArray
-//            booksAdapter?.bookList = books
 
-            val booksList = view.findViewById<RecyclerView>(R.id.booksList)
-            booksAdapter = BooksAdapter(books)
-            booksList.setLayoutManager(LinearLayoutManager(context))
-
-            booksList.adapter = booksAdapter
-            Log.d(TAG, "booksAdapter: $booksAdapter")
+                when (result) {
+                    is Result.Failure -> {
+//                        val ex = result.getException()
+//                        Log.d(TAG, "GET /api/books ex: ${ex.message}")
+//                        message.text = ex.message
+                        message.text = "Network problem, or problem with the server..."
+                        message.textSize = 40f
+                        message.setTextColor(Color.RED)
+                    }
+                    is Result.Success -> {
+                        message.visibility = INVISIBLE
+                        books = result.get().obj().get("results") as JSONArray
+                        val booksList = view.findViewById<RecyclerView>(R.id.booksList)
+                        booksAdapter = BooksAdapter(books)
+                        booksList.setLayoutManager(LinearLayoutManager(context))
+                        booksList.adapter = booksAdapter
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.d(TAG, "GET /api/books ex: ${e.message}")
+            message.text = e.message
+            message.textSize = 40f
+            message.setTextColor(Color.RED)
+        } finally {
+            Log.d(TAG, "Network problem of some type...")
         }
+
+        val localBooksButton = view.findViewById<Button>(R.id.localBooksButton)
+        localBooksButton.setOnClickListener {
+            this.fragmentManager.popBackStackImmediate()
+        }
+
 
 
         return view
