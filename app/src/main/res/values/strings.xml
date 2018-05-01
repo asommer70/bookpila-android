@@ -27,4 +27,5 @@
     <string name="local_books">Local Books</string>
     <string name="server_books">Server Books</string>
     <string name="getting_books">Getting books from server...</string>
+    <string name="delete">Delete</string>
 </resources>

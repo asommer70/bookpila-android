@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.INVISIBLE
+import android.view.View.VISIBLE
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
@@ -32,9 +33,10 @@ class BookFragment(): Fragment() {
         val localDir = prefs.getString("local_dir", "")
 
         val bookString = arguments.getString(book)
-        Log.d(TAG, "bookString: $bookString")
         val book = JSONObject(bookString)
         val fileName = book.get("upload").toString().split("/").last().split(".").first()
+        val fileExt = book.get("upload").toString().split("/").last().split(".").last()
+
 
         val title = view.findViewById<TextView>(R.id.detailTitle)
         val author = view.findViewById<TextView>(R.id.detailAuthor)
@@ -42,6 +44,7 @@ class BookFragment(): Fragment() {
         val cover = view.findViewById<ImageView>(R.id.detailCover)
         val download = view.findViewById<Button>(R.id.downloadButton)
         val read = view.findViewById<Button>(R.id.readButton)
+        val delete = view.findViewById<Button>(R.id.deleteButton)
 
         title.text = book.get("title").toString()
         author.text = "Author: ${book.get("author").toString()}"
@@ -51,8 +54,16 @@ class BookFragment(): Fragment() {
         // Set button visibility based on Local or Server.
         val dataSource = BookPilaDataSource(context)
         val localBook = dataSource.getBook(book.get("title").toString())
-        if (localBook != null) {
+        Log.d(TAG, "fileExt: |${fileExt}|")
+        if (localBook != null || fileExt.equals("null") || !fileExt.equals("epub")) {
             download.visibility = INVISIBLE
+
+            if (fileExt.equals("null") || !fileExt.equals("epub")) {
+                read.visibility = INVISIBLE
+            }
+        } else {
+            read.visibility = INVISIBLE
+            delete.visibility = VISIBLE
         }
 
         download.setOnClickListener {
@@ -65,7 +76,9 @@ class BookFragment(): Fragment() {
             }.response { req, res, result ->
                 Log.d(TAG, "file downloaded...")
 
-                // TODO:as save book data into a local SQL database.
+                download.visibility = INVISIBLE
+
+                // Save book data into a local SQL database.
                 book.put("local_filename", "$fileName.epub")
                 book.put("local_path", "$localDir/$fileName.epub")
                 dataSource.createBook(book)
@@ -83,6 +96,10 @@ class BookFragment(): Fragment() {
 
 //            getHighlightsAndSave();
 //            getLastReadPositionAndSave();
+        }
+
+        delete.setOnClickListener {
+            dataSource.deleteBook(book.get("title").toString())
         }
 
         return view

@@ -184,7 +184,7 @@ class BookPilaDataSource(context: Context) {
     fun deleteBook(title: String) {
         val db = open()
 
-        db.delete("books", "title = ${title}", null)
+        db.delete("books", "title = \"${title}\"", null)
 
         close(db)
     }
