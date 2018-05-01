@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 import org.json.JSONArray
 import org.json.JSONObject
 import android.app.Activity
+import android.graphics.Color
 import android.os.Bundle
 import android.widget.LinearLayout
 import java.io.Serializable

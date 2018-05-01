@@ -1,6 +1,7 @@
 package com.thehoick.bookpila
 
 import android.app.Fragment
+import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -14,6 +15,8 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.folioreader.util.FolioReader
 import com.github.kittinunf.fuel.Fuel
+import com.thehoick.bookpila.models.BookPilaDataSource
+import kotlinx.android.synthetic.main.fragment_book.*
 import org.json.JSONObject
 import java.io.File
 
@@ -23,11 +26,13 @@ class BookFragment(): Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater!!.inflate(R.layout.fragment_book, container, false)
+        view.setBackgroundColor(Color.WHITE)
 
         val prefs = activity.getSharedPreferences(activity.packageName + "_preferences", 0)
         val localDir = prefs.getString("local_dir", "")
 
         val bookString = arguments.getString(book)
+        Log.d(TAG, "bookString: $bookString")
         val book = JSONObject(bookString)
         val fileName = book.get("upload").toString().split("/").last().split(".").first()
 
@@ -43,7 +48,12 @@ class BookFragment(): Fragment() {
         about.text = "About:\n ${book.get("about").toString()}"
         Glide.with(view.context).load(book.get("cover_url")).into(cover)
 
-        // TODO:as set button visibility based on Local or Server.
+        // Set button visibility based on Local or Server.
+        val dataSource = BookPilaDataSource(context)
+        val localBook = dataSource.getBook(book.get("title").toString())
+        if (localBook != null) {
+            download.visibility = INVISIBLE
+        }
 
         download.setOnClickListener {
             Log.d(TAG, "Download ${book.get("upload")}")
@@ -56,6 +66,9 @@ class BookFragment(): Fragment() {
                 Log.d(TAG, "file downloaded...")
 
                 // TODO:as save book data into a local SQL database.
+                book.put("local_filename", "$fileName.epub")
+                book.put("local_path", "$localDir/$fileName.epub")
+                dataSource.createBook(book)
             }
         }
 

@@ -16,4 +16,24 @@ class Book (
     val local_path: String?,
     val created_at: String?,
     val updated_at: String?
-)
+) {
+    override fun toString(): String {
+        return """{
+            "_id": $_id,
+            "id": $id,
+            "title": "$title",
+            "about": "$about",
+            "author": "$author",
+            "isbn": "$isbn",
+            "upload": "$upload",
+            "current_loc": "$current_loc",
+            "cover": "$cover",
+            "cover_image": "$cover_image",
+            "cover_url": "$cover_url",
+            "local_filename": "$local_filename",
+            "local_path": "$local_path",
+            "created_at": "$created_at",
+            "updated_at": "$updated_at"
+        }"""
+    }
+}

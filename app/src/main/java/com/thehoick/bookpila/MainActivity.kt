@@ -67,6 +67,7 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
 
         val serverBooksButton = findViewById<Button>(R.id.serverBooksButton)
         serverBooksButton.setOnClickListener {
+            Log.d(TAG, "serverBooksButton onClick...")
             try {
                 if (token.isEmpty()) {
                     // Open the LoginActivity.
@@ -96,6 +97,7 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
 
         val localBooksButton = findViewById<Button>(R.id.localBooksButton)
         localBooksButton.setOnClickListener {
+            Log.d(TAG, "localBooksButton onClick...")
             try {
                 if (booksFragment.isVisible) {
                     Log.d(TAG, "booksFragment.isVisible(): ${booksFragment.isVisible()}")

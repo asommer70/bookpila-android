@@ -61,41 +61,34 @@ class ServerBooksFragment: Fragment() {
         FuelManager.instance.baseHeaders = mapOf("Authorization" to "Token " + token)
 
         // HTTP GET /api/books
-        try {
-            Fuel.get(url + "/api/books").responseJson { request, response, result ->
-                Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
+        Fuel.get(url + "/api/books").responseJson { request, response, result ->
+            Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
 //            Log.d(TAG, "result.get().obj().get(results).class: ${result.get().obj().get("results").javaClass}")
 
-                when (result) {
-                    is Result.Failure -> {
+            when (result) {
+                is Result.Failure -> {
 //                        val ex = result.getException()
 //                        Log.d(TAG, "GET /api/books ex: ${ex.message}")
 //                        message.text = ex.message
-                        message.text = "Network problem, or problem with the server..."
-                        message.textSize = 40f
-                        message.setTextColor(Color.RED)
-                    }
-                    is Result.Success -> {
-                        message.visibility = INVISIBLE
-                        books = result.get().obj().get("results") as JSONArray
-                        val booksList = view.findViewById<RecyclerView>(R.id.booksList)
-                        booksAdapter = BooksAdapter(books)
-                        booksList.setLayoutManager(LinearLayoutManager(context))
-                        booksList.adapter = booksAdapter
-                    }
+                    message.text = "Network problem, or problem with the server..."
+                    message.textSize = 40f
+                    message.setTextColor(Color.RED)
+                }
+                is Result.Success -> {
+                    message.visibility = INVISIBLE
+                    books = result.get().obj().get("results") as JSONArray
+                    val booksList = view.findViewById<RecyclerView>(R.id.booksList)
+                    booksAdapter = BooksAdapter(books)
+                    booksList.setLayoutManager(LinearLayoutManager(context))
+                    booksList.adapter = booksAdapter
                 }
             }
-        } catch (e: Exception) {
-            Log.d(TAG, "GET /api/books ex: ${e.message}")
-            message.text = e.message
-            message.textSize = 40f
-            message.setTextColor(Color.RED)
-        } finally {
-            Log.d(TAG, "Network problem of some type...")
         }
 
         val localBooksButton = view.findViewById<Button>(R.id.localBooksButton)
         localBooksButton.setOnClickListener {
+            Log.d(TAG, "localBooksButton onClick...")
+
             this.fragmentManager.popBackStackImmediate()
         }
 

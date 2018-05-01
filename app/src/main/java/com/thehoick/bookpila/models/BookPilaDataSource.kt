@@ -35,7 +35,7 @@ class BookPilaDataSource(context: Context) {
         bookValues.put("cover_image", book.get("cover_image").toString())
         bookValues.put("cover_url", book.get("cover_url").toString())
         bookValues.put("local_filename", book.get("local_filename").toString())
-        bookValues.put("local_filename", book.get("local_path").toString())
+        bookValues.put("local_path", book.get("local_path").toString())
         bookValues.put("created_at", book.get("created_at").toString())
         bookValues.put("updated_at", book.get("updated_at").toString())
 
