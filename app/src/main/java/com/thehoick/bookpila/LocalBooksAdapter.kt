@@ -35,6 +35,10 @@ class LocalBooksAdapter(books: List<Book>): RecyclerView.Adapter<LocalBookViewHo
         bookList = books
     }
 
+    fun newBooks(books: List<Book>) {
+        notifyDataSetChanged()
+    }
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LocalBookViewHolder {
         val itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_book, parent, false)
         return LocalBookViewHolder(itemView)
@@ -57,11 +61,14 @@ class LocalBooksAdapter(books: List<Book>): RecyclerView.Adapter<LocalBookViewHo
 
             val bundle = Bundle()
             bundle.putString(bookFragment.book, book.toString())
+            bundle.putBoolean(bookFragment.only_book, if (bookList!!.size == 1) true else false)
             bookFragment.arguments = bundle
 
             fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
             fragmentTransaction.addToBackStack(null)
             fragmentTransaction.commit()
+
+            // TODO:as get result from fragment and update adapter.
         }
     }
 
@@ -80,4 +87,6 @@ class LocalBooksAdapter(books: List<Book>): RecyclerView.Adapter<LocalBookViewHo
     override fun getItemViewType(position: Int): Int {
         return super.getItemViewType(position)
     }
+
+
 }

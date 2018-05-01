@@ -17,13 +17,20 @@ import com.bumptech.glide.Glide
 import com.folioreader.util.FolioReader
 import com.github.kittinunf.fuel.Fuel
 import com.thehoick.bookpila.models.BookPilaDataSource
+import kotlinx.android.synthetic.main.activity_main.*
+//import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.fragment_book.*
 import org.json.JSONObject
 import java.io.File
+import android.R.id.edit
+import android.content.SharedPreferences
 
-class BookFragment(): Fragment() {
+
+
+class BookFragment: Fragment() {
     val TAG = BookFragment::class.java.simpleName
     val book = "BOOK"
+    val only_book = "only_book"
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater!!.inflate(R.layout.fragment_book, container, false)
@@ -33,6 +40,7 @@ class BookFragment(): Fragment() {
         val localDir = prefs.getString("local_dir", "")
 
         val bookString = arguments.getString(book)
+        val onlyBook = arguments.getBoolean(only_book)
         val book = JSONObject(bookString)
         val fileName = book.get("upload").toString().split("/").last().split(".").first()
         val fileExt = book.get("upload").toString().split("/").last().split(".").last()
@@ -61,9 +69,13 @@ class BookFragment(): Fragment() {
             if (fileExt.equals("null") || !fileExt.equals("epub")) {
                 read.visibility = INVISIBLE
             }
+
+            if (onlyBook) {
+                delete.visibility = INVISIBLE
+            }
         } else {
             read.visibility = INVISIBLE
-            delete.visibility = VISIBLE
+            delete.visibility = INVISIBLE
         }
 
         download.setOnClickListener {
@@ -82,6 +94,14 @@ class BookFragment(): Fragment() {
                 book.put("local_filename", "$fileName.epub")
                 book.put("local_path", "$localDir/$fileName.epub")
                 dataSource.createBook(book)
+
+
+//                activity.booksList.adapter.notifyDataSetChanged()
+                val newBooks = dataSource.getBooks()
+//                activity.booksAdapter.newBooks(newBooks)
+                this.activity.booksList.adapter
+                Log.d(TAG, "downlaod ${this.activity.booksList.adapter}")
+                this.fragmentManager.popBackStackImmediate()
             }
         }
 
@@ -92,7 +112,7 @@ class BookFragment(): Fragment() {
             //        folioReader?.registerHighlightListener(this)z
 //            folioReader.setLastReadStateCallback(activity)
 
-            folioReader.openBook(File("$localDir/$fileName.epub").toString())
+            folioReader.openBook("file://" + book.get("local_path").toString())
 
 //            getHighlightsAndSave();
 //            getLastReadPositionAndSave();
@@ -100,6 +120,9 @@ class BookFragment(): Fragment() {
 
         delete.setOnClickListener {
             dataSource.deleteBook(book.get("title").toString())
+            this.fragmentManager.popBackStackImmediate()
+//            activity.booksList.adapter.notifyDataSetChanged()
+//            activity.booksList.adapter.notifyDataSetChanged()
         }
 
         return view

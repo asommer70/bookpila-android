@@ -23,6 +23,7 @@ import com.folioreader.util.LastReadStateCallback
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.extension.responseJson
 import com.github.kittinunf.fuel.core.FuelManager
+import com.thehoick.bookpila.models.Book
 import com.thehoick.bookpila.models.BookPilaDataSource
 import org.json.JSONArray
 import org.json.JSONObject
@@ -37,7 +38,8 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
     lateinit var username: String
     lateinit var presenter: MainActivityPresenter
     lateinit var booksFragment: ServerBooksFragment
-    private var currentActionMode: ActionMode? = null
+    lateinit var booksList: RecyclerView
+    lateinit var booksAdapter: LocalBooksAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,16 +55,64 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
         val dataSource = BookPilaDataSource(this)
         val books = dataSource.getBooks()
 
+//        val ed = prefs.edit()
+//        ed.putBoolean("FIRSTRUN", true)
+//        ed.commit()
+//        dataSource.deleteBook("The Sign of Four")
+
+        // Add The Sign of Four to the localBooks.
+        val isFirstRun = prefs.getBoolean("FIRSTRUN", true)
+        if (isFirstRun) {
+            // Code to run once
+            val editor = prefs.edit()
+            editor.putBoolean("FIRSTRUN", false)
+            editor.commit()
+
+            val defaultBook = JSONObject(mutableMapOf(
+                    "id" to 0,
+                    "title" to "The Sign of Four",
+                    "author" to "Sir Arthur Conan Doyle",
+                    "about" to "The story is set in 1888. The Sign of the Four has a complex plot involving service in India, the Indian Rebellion of 1857, a stolen treasure, and a secret pact among four convicts ('the Four' of the title) and two corrupt prison guards. It presents the detective's drug habit and humanizes him in a way that had not been done in the preceding novel, A Study in Scarlet (1887). It also introduces Doctor Watson's future wife, Mary Morstan.",
+                    "isbn" to "",
+                    "upload" to "the_sign_of_four.epub",
+                    "current_loc" to "",
+                    "cover" to "",
+                    "cover_image" to "",
+                    "cover_url" to "/android_asset/books/The_Sign_of_Four_cover_1892.jpg",
+                    "local_filename" to "the_sign_of_four.epub",
+                    "local_path" to "/android_asset/books/the_sign_of_four.epub",
+                    "created_at" to "",
+                    "updated_at" to ""
+
+            ))
+            dataSource.createBook(defaultBook)
+        }
+
 //        startActionMode(modeCallBack)
 
         if (books.size == 0) {
             defaultTextView.visibility = VISIBLE
             defaultTextView.text = getString(R.string.no_local_books)
         } else {
-            val booksList = findViewById<RecyclerView>(R.id.booksList)
-            val booksAdapter = LocalBooksAdapter(books)
+            booksList = findViewById<RecyclerView>(R.id.booksList)
+            booksAdapter = LocalBooksAdapter(books)
             booksList.setLayoutManager(LinearLayoutManager(this))
             booksList.adapter = booksAdapter
+
+            fragmentManager.addOnBackStackChangedListener {
+//                booksAdapter.notifyItemInserted()
+                val newBooks = dataSource.getBooks()
+
+                Log.d(TAG, "onBackStackChangedListener... newBooks.size: ${newBooks.size}")
+
+
+                booksAdapter.bookList = newBooks
+                booksAdapter.newBooks(newBooks)
+                if (newBooks.size == 0) {
+                    defaultTextView.visibility = VISIBLE
+                    defaultTextView.text = getString(R.string.no_local_books)
+                }
+            }
         }
 
         val serverBooksButton = findViewById<Button>(R.id.serverBooksButton)
@@ -312,40 +362,4 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
         startActivityForResult(intent, 100)
     }
 
-    private val modeCallBack = object : ActionMode.Callback {
-        // Called when the action mode is created; startActionMode() was called
-        override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            mode.title = "Actions"
-            mode.menuInflater.inflate(R.menu.actions, menu)
-            return true
-        }
-
-        // Called each time the action mode is shown.
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            return false // Return false if nothing is done
-        }
-
-        // Called when the user selects a contextual menu item
-        override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
-            when (item.itemId) {
-                R.id.localBooks -> {
-                    Toast.makeText(this@MainActivity, "Local Books!", Toast.LENGTH_SHORT).show()
-                    mode.finish() // Action picked, so close the contextual menu
-                    return true
-                }
-                R.id.serverBooks -> {
-                    // Trigger the deletion here
-                    Toast.makeText(this@MainActivity, "Server Books!", Toast.LENGTH_SHORT).show()
-                    mode.finish() // Action picked, so close the contextual menu
-                    return true
-                }
-                else -> return false
-            }
-        }
-
-        // Called when the user exits the action mode
-        override fun onDestroyActionMode(mode: ActionMode) {
-            currentActionMode = null // Clear current action mode
-        }
-    }
 }
