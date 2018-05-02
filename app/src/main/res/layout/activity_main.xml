@@ -18,19 +18,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <Button
-            android:id="@+id/localBooksButton"
-            android:layout_width="50dp"
+
+        <Switch
+            android:id="@+id/localOrServer"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
+            android:checked="true"
             android:text="@string/local_books" />
 
-        <Button
-            android:id="@+id/serverBooksButton"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:text="@string/server_books" />
+
     </LinearLayout>
 
     <View

@@ -28,26 +28,11 @@ import java.net.ConnectException
 class ServerBooksFragment: Fragment() {
     val TAG = ServerBooksFragment::class.java.simpleName
     var booksAdapter: BooksAdapter? = null
-//    lateinit var booksList: RecyclerView
     lateinit var message: TextView
     lateinit var books: JSONArray
 
-    fun getBooks() {
-
-    }
-
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater!!.inflate(R.layout.activity_main, container, false)
-
-//        if (booksAdapter == null) {
-//            getBooks(view)
-//        } else {
-//            booksList = view.findViewById<RecyclerView>(R.id.booksList)
-//            booksList.adapter = booksAdapter
-//        }
-
-//        booksAdapter = BooksAdapter(getBooks(view))
-//        getBooks()
 
         message = view.findViewById<TextView>(R.id.defaultTextView)
         message.setText(getString(R.string.getting_books))
@@ -63,14 +48,10 @@ class ServerBooksFragment: Fragment() {
         // HTTP GET /api/books
         Fuel.get(url + "/api/books").responseJson { request, response, result ->
             Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
-//            Log.d(TAG, "result.get().obj().get(results).class: ${result.get().obj().get("results").javaClass}")
 
             when (result) {
                 is Result.Failure -> {
-//                        val ex = result.getException()
-//                        Log.d(TAG, "GET /api/books ex: ${ex.message}")
-//                        message.text = ex.message
-                    message.text = "Network problem, or problem with the server..."
+                    message.text = getString(R.string.server_network_problem)
                     message.textSize = 40f
                     message.setTextColor(Color.RED)
                 }
@@ -85,14 +66,12 @@ class ServerBooksFragment: Fragment() {
             }
         }
 
-        val localBooksButton = view.findViewById<Button>(R.id.localBooksButton)
-        localBooksButton.setOnClickListener {
-            Log.d(TAG, "localBooksButton onClick...")
-
+        val switch = view.findViewById<Switch>(R.id.localOrServer)
+        switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            buttonView.isChecked = true
+            buttonView.text = getResources().getString(R.string.server_books)
             this.fragmentManager.popBackStackImmediate()
         }
-
-
 
         return view
     }

@@ -10,6 +10,7 @@ import android.util.Log
 import android.view.*
 import android.view.View.VISIBLE
 import android.widget.Button
+import android.widget.Switch
 import android.widget.TextView
 import com.folioreader.util.FolioReader
 import java.io.IOException
@@ -55,6 +56,18 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
         val dataSource = BookPilaDataSource(this)
         val books = dataSource.getBooks()
 
+        // Return savedFragment, or create a new localBooksFragment.
+        val savedFragment = fragmentManager.findFragmentById(R.id.container)
+        if (savedFragment == null) {
+            val localBooksFragment = LocalBooksFragment()
+            val fragmentTransaction = fragmentManager.beginTransaction()
+
+            fragmentTransaction.replace(R.id.container, localBooksFragment, "local_books_fragment")
+            fragmentTransaction.commit()
+        } else {
+
+        }
+
 //        val ed = prefs.edit()
 //        ed.putBoolean("FIRSTRUN", true)
 //        ed.commit()
@@ -90,35 +103,60 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
 
 //        startActionMode(modeCallBack)
 
-        if (books.size == 0) {
-            defaultTextView.visibility = VISIBLE
-            defaultTextView.text = getString(R.string.no_local_books)
-        } else {
-            booksList = findViewById<RecyclerView>(R.id.booksList)
-            booksAdapter = LocalBooksAdapter(books)
-            booksList.setLayoutManager(LinearLayoutManager(this))
-            booksList.adapter = booksAdapter
 
-            fragmentManager.addOnBackStackChangedListener {
-//                booksAdapter.notifyItemInserted()
-                val newBooks = dataSource.getBooks()
+//        val serverBooksButton = findViewById<Button>(R.id.serverBooksButton)
+//        serverBooksButton.setOnClickListener {
+//            Log.d(TAG, "serverBooksButton onClick...")
+//            try {
+//                if (token.isEmpty()) {
+//                    // Open the LoginActivity.
+//                    val intent = Intent(this, LoginActivity::class.java)
+//                    intent.putExtra("loginType", "books");
+//                    startActivityForResult(intent, 200)
+//
+//                    val needToLoginFragment = NeedToLoginFragment()
+//                    val fragmentTransaction = this.fragmentManager.beginTransaction()
+//                    fragmentTransaction.replace(R.id.container, needToLoginFragment, "needtologin_fragment")
+//                    fragmentTransaction.addToBackStack(null)
+//                    fragmentTransaction.commit()
+//                } else {
+//                    booksFragment = ServerBooksFragment()
+//                    val fragmentTransaction = this.fragmentManager.beginTransaction()
+//
+//                    fragmentTransaction.replace(R.id.container, booksFragment, "server_books_fragment")
+//                    fragmentTransaction.addToBackStack(null)
+//                    fragmentTransaction.commit()
+//                }
+//            } catch (e: Exception) {
+//                Log.d(TAG, "e.message: ${e.message}")
+//            }
+//
+//        }
 
-                Log.d(TAG, "onBackStackChangedListener... newBooks.size: ${newBooks.size}")
 
+//        val localBooksButton = findViewById<Button>(R.id.localBooksButton)
+//        localBooksButton.setOnClickListener {
+//            Log.d(TAG, "localBooksButton onClick...")
+//            try {
+//                if (booksFragment.isVisible) {
+//                    Log.d(TAG, "booksFragment.isVisible(): ${booksFragment.isVisible()}")
+//                    onBackPressed()
+//                }
+//            } catch (e: Exception) {
+//                Log.d(TAG, "e.message: ${e.message}")
+//            }
+//        }
 
-                booksAdapter.bookList = newBooks
-                booksAdapter.newBooks(newBooks)
-                if (newBooks.size == 0) {
-                    defaultTextView.visibility = VISIBLE
-                    defaultTextView.text = getString(R.string.no_local_books)
+        val switch = findViewById<Switch>(R.id.localOrServer)
+        switch.setOnCheckedChangeListener { buttonView, isChecked ->
+            if (isChecked) {
+                if (booksFragment.isVisible) {
+                    Log.d(TAG, "booksFragment.isVisible(): ${booksFragment.isVisible()}")
+                    buttonView.isChecked = false
+                    onBackPressed()
                 }
-            }
-        }
 
-        val serverBooksButton = findViewById<Button>(R.id.serverBooksButton)
-        serverBooksButton.setOnClickListener {
-            Log.d(TAG, "serverBooksButton onClick...")
-            try {
+            } else {
                 if (token.isEmpty()) {
                     // Open the LoginActivity.
                     val intent = Intent(this, LoginActivity::class.java)
@@ -131,30 +169,15 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
                     fragmentTransaction.addToBackStack(null)
                     fragmentTransaction.commit()
                 } else {
+                    buttonView.isChecked = false
+                    buttonView.text = getResources().getString(R.string.server_books)
                     booksFragment = ServerBooksFragment()
                     val fragmentTransaction = this.fragmentManager.beginTransaction()
 
-                    fragmentTransaction.replace(R.id.container, booksFragment, "books_fragment")
+                    fragmentTransaction.replace(R.id.container, booksFragment, "server_books_fragment")
                     fragmentTransaction.addToBackStack(null)
                     fragmentTransaction.commit()
                 }
-            } catch (e: Exception) {
-                Log.d(TAG, "e.message: ${e.message}")
-            }
-
-        }
-
-
-        val localBooksButton = findViewById<Button>(R.id.localBooksButton)
-        localBooksButton.setOnClickListener {
-            Log.d(TAG, "localBooksButton onClick...")
-            try {
-                if (booksFragment.isVisible) {
-                    Log.d(TAG, "booksFragment.isVisible(): ${booksFragment.isVisible()}")
-                    onBackPressed()
-                }
-            } catch (e: Exception) {
-                Log.d(TAG, "e.message: ${e.message}")
             }
         }
 
