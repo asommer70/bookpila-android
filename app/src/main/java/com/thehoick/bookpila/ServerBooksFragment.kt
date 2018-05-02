@@ -78,11 +78,6 @@ class ServerBooksFragment: Fragment() {
             switch.isChecked = false
             this.fragmentManager.popBackStackImmediate()
         }
-//        switch.setOnCheckedChangeListener { buttonView, isChecked ->
-////            buttonView.isChecked = true
-//            buttonView.text = getResources().getString(R.string.local_books)
-//            this.fragmentManager.popBackStackImmediate()
-//        }
 
         return view
     }

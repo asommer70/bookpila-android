@@ -31,6 +31,7 @@ class BookFragment: Fragment() {
     val TAG = BookFragment::class.java.simpleName
     val book = "BOOK"
     val only_book = "only_book"
+    lateinit var tempFile: String
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater!!.inflate(R.layout.fragment_book, container, false)
@@ -84,7 +85,10 @@ class BookFragment: Fragment() {
             Log.d(TAG, "localDir: $localDir fileName: $fileName")
 
             Fuel.download(book.get("upload").toString()).destination { response, url ->
-                File.createTempFile(fileName, ".epub", File(localDir))
+                val temp = File.createTempFile(fileName, ".epub", File(localDir))
+                tempFile = temp.absolutePath
+
+                temp
             }.response { req, res, result ->
                 Log.d(TAG, "file downloaded...")
 
@@ -95,12 +99,8 @@ class BookFragment: Fragment() {
                 book.put("local_path", "$localDir/$fileName.epub")
                 dataSource.createBook(book)
 
+                File(tempFile).renameTo(File("$localDir/$fileName.epub"))
 
-//                activity.booksList.adapter.notifyDataSetChanged()
-                val newBooks = dataSource.getBooks()
-//                activity.booksAdapter.newBooks(newBooks)
-                this.activity.booksList.adapter
-                Log.d(TAG, "downlaod ${this.activity.booksList.adapter}")
                 this.fragmentManager.popBackStackImmediate()
             }
         }
@@ -109,10 +109,14 @@ class BookFragment: Fragment() {
             Log.d(TAG, "Read ${book.get("title")}...")
 
             val folioReader = FolioReader(activity)
-            //        folioReader?.registerHighlightListener(this)z
+            //        folioReader?.registerHighlightListener(this)
 //            folioReader.setLastReadStateCallback(activity)
 
-            folioReader.openBook("file://" + book.get("local_path").toString())
+            if (book.get("title").toString().equals("The Sign of Four")) {
+                folioReader.openBook("file://${book.get("local_path")}")
+            } else {
+                folioReader.openBook("${book.get("local_path")}")
+            }
 
 //            getHighlightsAndSave();
 //            getLastReadPositionAndSave();
@@ -121,8 +125,6 @@ class BookFragment: Fragment() {
         delete.setOnClickListener {
             dataSource.deleteBook(book.get("title").toString())
             this.fragmentManager.popBackStackImmediate()
-//            activity.booksList.adapter.notifyDataSetChanged()
-//            activity.booksList.adapter.notifyDataSetChanged()
         }
 
         return view
