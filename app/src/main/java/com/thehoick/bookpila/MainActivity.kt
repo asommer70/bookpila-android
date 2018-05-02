@@ -79,7 +79,7 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
             // Code to run once
             val editor = prefs.edit()
             editor.putBoolean("FIRSTRUN", false)
-            editor.commit()
+            editor.apply()
 
             val defaultBook = JSONObject(mutableMapOf(
                     "id" to 0,
@@ -147,39 +147,39 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
 //            }
 //        }
 
-        val switch = findViewById<Switch>(R.id.localOrServer)
-        switch.setOnCheckedChangeListener { buttonView, isChecked ->
-            if (isChecked) {
-                if (booksFragment.isVisible) {
-                    Log.d(TAG, "booksFragment.isVisible(): ${booksFragment.isVisible()}")
-                    buttonView.isChecked = false
-                    onBackPressed()
-                }
-
-            } else {
-                if (token.isEmpty()) {
-                    // Open the LoginActivity.
-                    val intent = Intent(this, LoginActivity::class.java)
-                    intent.putExtra("loginType", "books");
-                    startActivityForResult(intent, 200)
-
-                    val needToLoginFragment = NeedToLoginFragment()
-                    val fragmentTransaction = this.fragmentManager.beginTransaction()
-                    fragmentTransaction.replace(R.id.container, needToLoginFragment, "needtologin_fragment")
-                    fragmentTransaction.addToBackStack(null)
-                    fragmentTransaction.commit()
-                } else {
-                    buttonView.isChecked = false
-                    buttonView.text = getResources().getString(R.string.server_books)
-                    booksFragment = ServerBooksFragment()
-                    val fragmentTransaction = this.fragmentManager.beginTransaction()
-
-                    fragmentTransaction.replace(R.id.container, booksFragment, "server_books_fragment")
-                    fragmentTransaction.addToBackStack(null)
-                    fragmentTransaction.commit()
-                }
-            }
-        }
+//        val switch = findViewById<Switch>(R.id.localOrServer)
+//        switch.setOnCheckedChangeListener { buttonView, isChecked ->
+//            if (isChecked) {
+//                if (booksFragment.isVisible) {
+//                    Log.d(TAG, "booksFragment.isVisible(): ${booksFragment.isVisible()}")
+//                    buttonView.isChecked = false
+//                    onBackPressed()
+//                }
+//
+//            } else {
+//                if (token.isEmpty()) {
+//                    // Open the LoginActivity.
+//                    val intent = Intent(this, LoginActivity::class.java)
+//                    intent.putExtra("loginType", "books");
+//                    startActivityForResult(intent, 200)
+//
+//                    val needToLoginFragment = NeedToLoginFragment()
+//                    val fragmentTransaction = this.fragmentManager.beginTransaction()
+//                    fragmentTransaction.replace(R.id.container, needToLoginFragment, "needtologin_fragment")
+//                    fragmentTransaction.addToBackStack(null)
+//                    fragmentTransaction.commit()
+//                } else {
+//                    buttonView.isChecked = false
+//                    buttonView.text = getResources().getString(R.string.server_books)
+//                    booksFragment = ServerBooksFragment()
+//                    val fragmentTransaction = this.fragmentManager.beginTransaction()
+//
+//                    fragmentTransaction.replace(R.id.container, booksFragment, "server_books_fragment")
+//                    fragmentTransaction.addToBackStack(null)
+//                    fragmentTransaction.commit()
+//                }
+//            }
+//        }
 
 //        getBooks()
 

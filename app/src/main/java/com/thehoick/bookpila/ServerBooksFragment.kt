@@ -3,6 +3,7 @@ package com.thehoick.bookpila
 import android.app.Fragment
 import android.content.DialogInterface
 import android.graphics.Color
+import android.graphics.Color.*
 import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.design.widget.FloatingActionButton
@@ -33,6 +34,12 @@ class ServerBooksFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater!!.inflate(R.layout.activity_main, container, false)
+        view.setBackgroundColor(WHITE)
+
+        val switch = view.findViewById<Switch>(R.id.localOrServer)
+        switch.text = getResources().getString(R.string.server_books)
+        switch.isChecked = false
+
 
         message = view.findViewById<TextView>(R.id.defaultTextView)
         message.setText(getString(R.string.getting_books))
@@ -53,7 +60,7 @@ class ServerBooksFragment: Fragment() {
                 is Result.Failure -> {
                     message.text = getString(R.string.server_network_problem)
                     message.textSize = 40f
-                    message.setTextColor(Color.RED)
+                    message.setTextColor(RED)
                 }
                 is Result.Success -> {
                     message.visibility = INVISIBLE
@@ -66,12 +73,16 @@ class ServerBooksFragment: Fragment() {
             }
         }
 
-        val switch = view.findViewById<Switch>(R.id.localOrServer)
-        switch.setOnCheckedChangeListener { buttonView, isChecked ->
-            buttonView.isChecked = true
-            buttonView.text = getResources().getString(R.string.server_books)
+        switch.setOnClickListener {
+            switch.text = getResources().getString(R.string.local_books)
+            switch.isChecked = false
             this.fragmentManager.popBackStackImmediate()
         }
+//        switch.setOnCheckedChangeListener { buttonView, isChecked ->
+////            buttonView.isChecked = true
+//            buttonView.text = getResources().getString(R.string.local_books)
+//            this.fragmentManager.popBackStackImmediate()
+//        }
 
         return view
     }
