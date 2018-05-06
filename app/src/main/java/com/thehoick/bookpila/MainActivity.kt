@@ -89,6 +89,7 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
                     "isbn" to "",
                     "upload" to "the_sign_of_four.epub",
                     "current_loc" to "",
+                    "current_loc_folio" to "",
                     "cover" to "",
                     "cover_image" to "",
                     "cover_url" to "/android_asset/books/The_Sign_of_Four_cover_1892.jpg",

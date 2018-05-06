@@ -31,6 +31,7 @@ class BookPilaDataSource(context: Context) {
         bookValues.put("isbn", book.get("isbn").toString())
         bookValues.put("upload", book.get("upload").toString())
         bookValues.put("current_loc", book.get("current_loc").toString())
+        bookValues.put("current_loc_folio", book.get("current_loc_folio").toString())
         bookValues.put("cover", book.get("cover").toString())
         bookValues.put("cover_image", book.get("cover_image").toString())
         bookValues.put("cover_url", book.get("cover_url").toString())
@@ -56,6 +57,7 @@ class BookPilaDataSource(context: Context) {
             "isbn",
             "upload",
             "current_loc",
+            "current_loc_folio",
             "cover",
             "cover_image",
             "cover_url",
@@ -78,6 +80,7 @@ class BookPilaDataSource(context: Context) {
                     cursor.getString(cursor.getColumnIndex("isbn")),
                     cursor.getString(cursor.getColumnIndex("upload")),
                     cursor.getString(cursor.getColumnIndex("current_loc")),
+                    cursor.getString(cursor.getColumnIndex("current_loc_folio")),
                     cursor.getString(cursor.getColumnIndex("cover")),
                     cursor.getString(cursor.getColumnIndex("cover_image")),
                     cursor.getString(cursor.getColumnIndex("cover_url")),
@@ -106,6 +109,7 @@ class BookPilaDataSource(context: Context) {
                 "isbn",
                 "upload",
                 "current_loc",
+                "current_loc_folio",
                 "cover",
                 "cover_image",
                 "cover_url",
@@ -136,6 +140,7 @@ class BookPilaDataSource(context: Context) {
                     cursor.getString(cursor.getColumnIndex("isbn")),
                     cursor.getString(cursor.getColumnIndex("upload")),
                     cursor.getString(cursor.getColumnIndex("current_loc")),
+                    cursor.getString(cursor.getColumnIndex("current_loc_folio")),
                     cursor.getString(cursor.getColumnIndex("cover")),
                     cursor.getString(cursor.getColumnIndex("cover_image")),
                     cursor.getString(cursor.getColumnIndex("cover_url")),
@@ -165,7 +170,8 @@ class BookPilaDataSource(context: Context) {
         updateBookValues.put("cover", book.cover)
         updateBookValues.put("cover_image", book.cover_image)
         updateBookValues.put("cover_url", book.cover_url)
-        updateBookValues.put("current_loc", book.local_path)
+        updateBookValues.put("current_loc", book.current_loc)
+        updateBookValues.put("current_loc_folio", book.current_loc_folio)
         updateBookValues.put("local_filename", book.local_filename)
         updateBookValues.put("local_path", book.local_path)
         updateBookValues.put("created_at", book.created_at)

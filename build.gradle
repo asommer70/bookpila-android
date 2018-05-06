@@ -23,6 +23,7 @@ allprojects {
 //            url  "https://github.com/psiegman/mvn-repo/raw/master/releases"
 //        }
         maven { url "http://dl.bintray.com/mobisystech/maven" }
+        maven { url 'https://jitpack.io' }
     }
 }
 

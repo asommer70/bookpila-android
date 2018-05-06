@@ -32,6 +32,8 @@ class LocalBooksFragment(): Fragment() {
         val dataSource = BookPilaDataSource(context)
         books = dataSource.getBooks()
 
+        message = view.findViewById(R.id.defaultTextView)
+
         if (books.size == 0) {
             message.visibility = View.VISIBLE
             message.text = getString(R.string.no_local_books)
