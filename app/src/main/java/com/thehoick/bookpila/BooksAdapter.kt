@@ -11,6 +11,7 @@ import com.bumptech.glide.Glide
 import org.json.JSONArray
 import org.json.JSONObject
 import android.app.Activity
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.widget.LinearLayout
@@ -61,17 +62,24 @@ class BooksAdapter(books: JSONArray): RecyclerView.Adapter<BookViewHolder>() {
         Glide.with(holder.itemView.context).load(book.get("cover_url")).into(holder.cover!!)
 
         holder.itemView.setOnClickListener {
-            val bookFragment = BookFragment()
-            val manager = (it.context as Activity).fragmentManager
-            val fragmentTransaction = manager.beginTransaction()
 
-            val bundle = Bundle()
-            bundle.putString(bookFragment.book, book.toString())
-            bookFragment.arguments = bundle
+            val intent = Intent(it.context, BookActivity::class.java)
+            intent.putExtra("title", book.get("title").toString())
+            intent.putExtra("only_book", false.toString())
+//            it.startActivityForResult(intent, 100)
+            it.context.startActivity(intent)
 
-            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
+//            val bookFragment = BookFragment()
+//            val manager = (it.context as Activity).fragmentManager
+//            val fragmentTransaction = manager.beginTransaction()
+//
+//            val bundle = Bundle()
+//            bundle.putString(bookFragment.book, book.toString())
+//            bookFragment.arguments = bundle
+//
+//            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
+//            fragmentTransaction.addToBackStack(null)
+//            fragmentTransaction.commit()
         }
     }
 

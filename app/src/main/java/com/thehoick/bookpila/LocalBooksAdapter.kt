@@ -1,6 +1,7 @@
 package com.thehoick.bookpila
 
 import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -11,6 +12,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.thehoick.bookpila.models.Book
+import org.json.JSONObject
 
 class LocalBookViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView) {
     val TAG = BookViewHolder::class.java.simpleName
@@ -50,25 +52,26 @@ class LocalBooksAdapter(books: List<Book>): RecyclerView.Adapter<LocalBookViewHo
         holder.author?.text = "Author: ${book.author}"
         holder.about?.text = "About:\n ${book.about}"
 
-        val cover = book.cover
-        val coverImage = book.cover_image
         Glide.with(holder.itemView.context).load(book.cover_url).into(holder.cover!!)
 
         holder.itemView.setOnClickListener {
-            val bookFragment = BookFragment()
-            val manager = (it.context as Activity).fragmentManager
-            val fragmentTransaction = manager.beginTransaction()
+//            val bookFragment = BookFragment()
+//            val manager = (it.context as Activity).fragmentManager
+//            val fragmentTransaction = manager.beginTransaction()
+//
+//            val bundle = Bundle()
+//            bundle.putString(bookFragment.book, book.toString())
+//            bundle.putBoolean(bookFragment.only_book, if (bookList!!.size == 1) true else false)
+//            bookFragment.arguments = bundle
+//
+//            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
+//            fragmentTransaction.addToBackStack(null)
+//            fragmentTransaction.commit()
 
-            val bundle = Bundle()
-            bundle.putString(bookFragment.book, book.toString())
-            bundle.putBoolean(bookFragment.only_book, if (bookList!!.size == 1) true else false)
-            bookFragment.arguments = bundle
-
-            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
-            fragmentTransaction.addToBackStack(null)
-            fragmentTransaction.commit()
-
-            // TODO:as get result from fragment and update adapter.
+            val intent = Intent(it.context, BookActivity::class.java)
+            intent.putExtra("title", book.title)
+            intent.putExtra("only_book", if (bookList!!.size == 1) true.toString() else false.toString())
+            it.context.startActivity(intent)
         }
     }
 

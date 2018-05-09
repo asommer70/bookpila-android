@@ -22,12 +22,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.folioreader.ui.folio.activity.FolioActivity"
-            android:configChanges="orientation|screenSize"
-            android:label="@string/app_name"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:name="com.folioreader.ui.folio.activity.FolioActivity" />
         <activity android:name=".LoginActivity" />
 
+        <activity android:name=".BookActivity" />
     </application>
 
 </manifest>

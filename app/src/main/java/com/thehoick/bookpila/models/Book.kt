@@ -13,10 +13,10 @@ class Book (
         val cover: String?,
         val cover_image: String?,
         val cover_url: String?,
-        val local_filename: String?,
-        val local_path: String?,
+        var local_filename: String?,
+        var local_path: String?,
         val created_at: String?,
-        val updated_at: String?
+        var updated_at: String?
 ) {
     override fun toString(): String {
         return """{
@@ -28,7 +28,7 @@ class Book (
             "isbn": "$isbn",
             "upload": "$upload",
             "current_loc": "$current_loc",
-            "current_loc_folio": "$current_loc_folio",
+            "current_loc_folio": $current_loc_folio,
             "cover": "$cover",
             "cover_image": "$cover_image",
             "cover_url": "$cover_url",
