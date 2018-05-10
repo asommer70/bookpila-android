@@ -1,5 +1,6 @@
 package com.thehoick.bookpila
 
+//import kotlinx.android.synthetic.main.activity_main.*
 import android.app.Fragment
 import android.graphics.Color
 import android.os.Bundle
@@ -7,29 +8,20 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.View.INVISIBLE
-import android.view.View.VISIBLE
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
 import com.bumptech.glide.Glide
+import com.folioreader.Config
+import com.folioreader.Constants.FONT_RALEWAY
 import com.folioreader.util.FolioReader
+import com.folioreader.util.LastReadStateCallback
 import com.github.kittinunf.fuel.Fuel
+import com.thehoick.bookpila.models.Book
 import com.thehoick.bookpila.models.BookPilaDataSource
-import kotlinx.android.synthetic.main.activity_main.*
-//import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.fragment_book.*
 import org.json.JSONObject
 import java.io.File
-import android.R.id.edit
-import android.content.SharedPreferences
-import android.widget.*
-import com.folioreader.Config
-import com.folioreader.Config.ConfigBuilder
-import com.folioreader.Constants.FONT_RALEWAY
-import com.folioreader.Font
-import com.folioreader.util.LastReadStateCallback
-import com.google.gson.JsonParser
-import com.thehoick.bookpila.models.Book
-import org.readium.r2.streamer.Server.Server
-import org.readium.r2_streamer.parser.EpubParser
 
 
 class BookFragment: Fragment() {
@@ -49,13 +41,12 @@ class BookFragment: Fragment() {
 
         val bookString = arguments.getString(book)
         val onlyBook = arguments.getBoolean(only_book)
-        Log.d(TAG, "bookString: $bookString")
-        val book = JsonParser().parse(bookString).getAsJsonObject()
+        val book = JSONObject(bookString)
 
-        Log.d(TAG, "book.get(upload): ${book.get("upload").asString}")
+        Log.d(TAG, "book.get(upload): ${book.get("upload")}")
 
-        val fileName = book.get("upload").asString.split("/").last().split(".").first()
-        val fileExt = book.get("upload").asString.split("/").last().split(".").last()
+        val fileName = book.get("upload").toString().split("/").last().split(".").first()
+        val fileExt = book.get("upload").toString().split("/").last().split(".").last()
         Log.d(TAG, "fileName: $fileName, fileExt: $fileExt |")
 
 
@@ -67,14 +58,14 @@ class BookFragment: Fragment() {
         val read = view.findViewById<Button>(R.id.readButton)
         val delete = view.findViewById<Button>(R.id.deleteButton)
 
-        title.text = book.get("title").asString
-        author.text = "Author: ${book.get("author").asString}"
-        about.text = "About:\n ${book.get("about").asString}"
-        Glide.with(view.context).load(book.get("cover_url").asString).into(cover)
+        title.text = book.get("title").toString()
+        author.text = "Author: ${book.get("author")}"
+        about.text = "About:\n ${book.get("about")}"
+        Glide.with(view.context).load(book.get("cover_url").toString()).into(cover)
 
         // Set button visibility based on Local or Server.
         val dataSource = BookPilaDataSource(context)
-        localBook = dataSource.getBook(book.get("title").asString)!!
+        localBook = dataSource.getBook(book.get("title").toString())!!
         Log.d(TAG, "fileExt: |${fileExt}|")
 
         if (localBook._id != null || fileExt.equals("null") || !fileExt.equals("epub")) {
@@ -93,11 +84,11 @@ class BookFragment: Fragment() {
         }
 
         download.setOnClickListener {
-            Log.d(TAG, "Download ${book.get("upload").asString}")
+            Log.d(TAG, "Download ${book.get("upload")}")
 
             Log.d(TAG, "localDir: $localDir fileName: $fileName")
 
-            Fuel.download(book.get("upload").asString).destination { response, url ->
+            Fuel.download(book.get("upload").toString()).destination { response, url ->
                 val temp = File.createTempFile(fileName, ".epub", File(localDir))
                 tempFile = temp.absolutePath
 
@@ -108,10 +99,8 @@ class BookFragment: Fragment() {
                 download.visibility = INVISIBLE
 
                 // Save book data into a local SQL database.
-//                book.put("local_filename", "$fileName.epub")
-//                book.put("local_path", "$localDir/$fileName.epub")
-                book.addProperty("local_filename", "$fileName.epub")
-                book.addProperty("local_path", "$localDir/$fileName.epub")
+                book.put("local_filename", "$fileName.epub")
+                book.put("local_path", "$localDir/$fileName.epub")
                 dataSource.createBook(book as JSONObject)
 
                 File(tempFile).renameTo(File("$localDir/$fileName.epub"))
@@ -121,7 +110,7 @@ class BookFragment: Fragment() {
         }
 
         read.setOnClickListener {
-            Log.d(TAG, "Read ${book.get("title").asString}...")
+            Log.d(TAG, "Read ${book.get("title")}...")
 
             val config = Config.ConfigBuilder()
                     .nightmode(true)
@@ -132,23 +121,21 @@ class BookFragment: Fragment() {
                     .build()
 
             folioReader = FolioReader(context.applicationContext)
-//                    folioReader?.registerHighlightListener(this)
-//            folioReader.setLastReadStateCallback(activity)
 
+            // Retrieve and set last read location.
+            val currentLocFolio = JSONObject(localBook.current_loc_folio)
+            folioReader!!.setLastReadState(
+                    currentLocFolio.get("lastReadChapterIndex") as Int,
+                    currentLocFolio.get("lastReadSpanIndex").toString()
+            )
 
-
-            if (book.get("title").asString.equals("The Sign of Four")) {
-                Log.d(TAG, "opening: file://${book.get("local_path").asString}")
-                folioReader?.openBook("file://${book.get("local_path").asString}", config)
+            if (book.get("title").toString().equals("The Sign of Four")) {
+                Log.d(TAG, "opening: file://${book.get("local_path")}")
+                folioReader?.openBook("file://${book.get("local_path").toString()}", config)
             } else {
-                folioReader?.openBook("${book.get("local_path").asString}", config)
-//                folioReader.setReadPosition(book.get("current_loc").toString());
+                folioReader?.openBook("${book.get("local_path").toString()}", config)
             }
 
-//            getHighlightsAndSave();
-            getLastReadPositionAndSave()
-
-//            folioReader?.setLastReadStateCallback(getlas)
 
             folioReader?.setLastReadStateCallback(object : LastReadStateCallback {
                 override fun saveLastReadState(lastReadChapterIndex: Int, lastReadSpanIndex: String?) {
@@ -156,9 +143,6 @@ class BookFragment: Fragment() {
                     val currentLocFolio = JSONObject()
                     currentLocFolio.put("lastReadChapterIndex", lastReadChapterIndex)
                     currentLocFolio.put("lastReadSpanIndex", JSONObject(lastReadSpanIndex))
-//                    localBook.current_loc_folio = """{"lastReadChapterIndex": $lastReadChapterIndex, "lastReadSpanIndex": $lastReadSpanIndex}"""
-//                    localBook.updated_at = Date.time.now()
-//                    val folioStr = currentLocFolio.toString().substring(1, currentLocFolio.toString().length-1)
                     localBook.current_loc_folio = currentLocFolio.toString()
                     Log.d(TAG, "localBook.current_loc_folio: ${localBook.current_loc}")
                     dataSource.updateBook(localBook)
@@ -172,32 +156,5 @@ class BookFragment: Fragment() {
         }
 
         return view
-    }
-
-    private fun getLastReadPositionAndSave() {
-        // Conan:
-        // epubcfi(/6/14[part-001-chapter-001-xhtml]!/4/2[part-001-chapter-001]/2[part-001-chapter-001-heading]/2/2/4/2/2/2/1:0)
-        // Dune:
-        // epubcfi(/6/20[chapter002]!/4/2[pg302]/2[pg303]/1:0)
-        // epubcfi(/6/32[chapter008]!/4/162[pg1068]/1:0)
-
-        Thread(Runnable {
-            if (!localBook.current_loc_folio.equals("")) {
-//                val currentLocFolio = JSONObject(localBook.current_loc_folio)
-                val currentLocFolio = JSONObject("{\"lastReadChapterIndex\":1,\"lastReadSpanIndex\":{\"usingId\":false,\"value\":7}}")
-//                val currentLocFolio = JsonParser().parse(localBook.current_loc_folio).getAsJsonObject()
-//                val currentLocFolio = localBook.current_loc_folio
-
-                Log.d(TAG, "localBook.current_loc_folio is String?: ${localBook.current_loc_folio is String}")
-                Log.d(TAG, "currentLocFolio: $currentLocFolio")
-//                Log.d(TAG, "lastChapterIndex: ${currentLocFolio.get("lastChapterIndex").asInt}")
-
-                val lastReadChapterIndex = currentLocFolio.get("lastReadChapterIndex") as Int
-                val lastReadSpanIndex = currentLocFolio.get("lastReadSpanIndex").toString()
-
-                Log.d(TAG, "getLastReadPositionAndSave thread lastReadChapterIndex: $lastReadChapterIndex")
-                folioReader!!.setLastReadState(lastReadChapterIndex, lastReadSpanIndex)
-            }
-        }).start()
     }
 }

@@ -55,23 +55,24 @@ class LocalBooksAdapter(books: List<Book>): RecyclerView.Adapter<LocalBookViewHo
         Glide.with(holder.itemView.context).load(book.cover_url).into(holder.cover!!)
 
         holder.itemView.setOnClickListener {
-//            val bookFragment = BookFragment()
-//            val manager = (it.context as Activity).fragmentManager
-//            val fragmentTransaction = manager.beginTransaction()
-//
-//            val bundle = Bundle()
-//            bundle.putString(bookFragment.book, book.toString())
-//            bundle.putBoolean(bookFragment.only_book, if (bookList!!.size == 1) true else false)
-//            bookFragment.arguments = bundle
-//
-//            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
-//            fragmentTransaction.addToBackStack(null)
-//            fragmentTransaction.commit()
+            val bookFragment = BookFragment()
+            val manager = (it.context as Activity).fragmentManager
+            val fragmentTransaction = manager.beginTransaction()
 
-            val intent = Intent(it.context, BookActivity::class.java)
-            intent.putExtra("title", book.title)
-            intent.putExtra("only_book", if (bookList!!.size == 1) true.toString() else false.toString())
-            it.context.startActivity(intent)
+            val bundle = Bundle()
+            bundle.putString(bookFragment.book, book.toString())
+            bundle.putBoolean(bookFragment.only_book, if (bookList!!.size == 1) true else false)
+            bookFragment.arguments = bundle
+
+            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
+            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
+
+//            val intent = Intent(it.context, BookActivity::class.java)
+//            intent.putExtra("title", book.title)
+//            intent.putExtra("only_book", if (bookList!!.size == 1) true.toString() else false.toString())
+//            it.context.startActivity(intent)
+
         }
     }
 

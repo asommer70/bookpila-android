@@ -63,23 +63,23 @@ class BooksAdapter(books: JSONArray): RecyclerView.Adapter<BookViewHolder>() {
 
         holder.itemView.setOnClickListener {
 
-            val intent = Intent(it.context, BookActivity::class.java)
-            intent.putExtra("title", book.get("title").toString())
-            intent.putExtra("only_book", false.toString())
-//            it.startActivityForResult(intent, 100)
-            it.context.startActivity(intent)
+//            val intent = Intent(it.context, BookActivity::class.java)
+//            intent.putExtra("title", book.get("title").toString())
+//            intent.putExtra("only_book", false.toString())
+////            it.startActivityForResult(intent, 100)
+//            it.context.startActivity(intent)
 
-//            val bookFragment = BookFragment()
-//            val manager = (it.context as Activity).fragmentManager
-//            val fragmentTransaction = manager.beginTransaction()
-//
-//            val bundle = Bundle()
-//            bundle.putString(bookFragment.book, book.toString())
-//            bookFragment.arguments = bundle
-//
-//            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
-//            fragmentTransaction.addToBackStack(null)
-//            fragmentTransaction.commit()
+            val bookFragment = BookFragment()
+            val manager = (it.context as Activity).fragmentManager
+            val fragmentTransaction = manager.beginTransaction()
+
+            val bundle = Bundle()
+            bundle.putString(bookFragment.book, book.toString())
+            bookFragment.arguments = bundle
+
+            fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
+            fragmentTransaction.addToBackStack(null)
+            fragmentTransaction.commit()
         }
     }
 
