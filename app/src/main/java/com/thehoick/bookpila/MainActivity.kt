@@ -2,35 +2,20 @@ package com.thehoick.bookpila
 
 import android.content.Intent
 import android.content.SharedPreferences
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
-import android.util.Log
-import android.view.*
-import android.view.View.VISIBLE
-import android.widget.Button
-import android.widget.Switch
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.TextView
-import com.folioreader.util.FolioReader
-import java.io.IOException
 import android.widget.Toast
 import com.folioreader.model.HighLight
-import java.io.BufferedReader
-import java.io.InputStreamReader
-//import com.folioreader.util.
-//import com.folioreader.util.FolioReader
-import com.folioreader.util.LastReadStateCallback
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.android.extension.responseJson
-import com.github.kittinunf.fuel.core.FuelManager
-import com.thehoick.bookpila.models.Book
+import com.folioreader.util.FolioReader
 import com.thehoick.bookpila.models.BookPilaDataSource
-import org.json.JSONArray
 import org.json.JSONObject
 
 
-class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityView {
+class MainActivity : AppCompatActivity(), MainActivityView {
     private val TAG = MainActivity::class.java.simpleName
     private var folioReader: FolioReader? = null
     lateinit var prefs: SharedPreferences
@@ -38,9 +23,8 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
     lateinit var token: String
     lateinit var username: String
     lateinit var presenter: MainActivityPresenter
-    lateinit var booksFragment: ServerBooksFragment
     lateinit var booksList: RecyclerView
-    lateinit var booksAdapter: LocalBooksAdapter
+    lateinit var dataSource: BookPilaDataSource
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +37,7 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
 
         token = prefs.getString("token", "")
 
-        val dataSource = BookPilaDataSource(this)
+        dataSource = BookPilaDataSource(this)
         val books = dataSource.getBooks()
 
         // Return savedFragment, or create a new localBooksFragment.
@@ -68,10 +52,8 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
 
         }
 
-//        val ed = prefs.edit()
-//        ed.putBoolean("FIRSTRUN", true)
-//        ed.commit()
-//        dataSource.deleteBook("The Sign of Four")
+        // Uncomment for testing.
+//        addFirst()
 
         // Add The Sign of Four to the localBooks.
         val isFirstRun = prefs.getBoolean("FIRSTRUN", true)
@@ -102,214 +84,19 @@ class MainActivity : AppCompatActivity(), LastReadStateCallback, MainActivityVie
             dataSource.createBook(defaultBook)
         }
 
-//        startActionMode(modeCallBack)
-
-
-//        val serverBooksButton = findViewById<Button>(R.id.serverBooksButton)
-//        serverBooksButton.setOnClickListener {
-//            Log.d(TAG, "serverBooksButton onClick...")
-//            try {
-//                if (token.isEmpty()) {
-//                    // Open the LoginActivity.
-//                    val intent = Intent(this, LoginActivity::class.java)
-//                    intent.putExtra("loginType", "books");
-//                    startActivityForResult(intent, 200)
-//
-//                    val needToLoginFragment = NeedToLoginFragment()
-//                    val fragmentTransaction = this.fragmentManager.beginTransaction()
-//                    fragmentTransaction.replace(R.id.container, needToLoginFragment, "needtologin_fragment")
-//                    fragmentTransaction.addToBackStack(null)
-//                    fragmentTransaction.commit()
-//                } else {
-//                    booksFragment = ServerBooksFragment()
-//                    val fragmentTransaction = this.fragmentManager.beginTransaction()
-//
-//                    fragmentTransaction.replace(R.id.container, booksFragment, "server_books_fragment")
-//                    fragmentTransaction.addToBackStack(null)
-//                    fragmentTransaction.commit()
-//                }
-//            } catch (e: Exception) {
-//                Log.d(TAG, "e.message: ${e.message}")
-//            }
-//
-//        }
-
-
-//        val localBooksButton = findViewById<Button>(R.id.localBooksButton)
-//        localBooksButton.setOnClickListener {
-//            Log.d(TAG, "localBooksButton onClick...")
-//            try {
-//                if (booksFragment.isVisible) {
-//                    Log.d(TAG, "booksFragment.isVisible(): ${booksFragment.isVisible()}")
-//                    onBackPressed()
-//                }
-//            } catch (e: Exception) {
-//                Log.d(TAG, "e.message: ${e.message}")
-//            }
-//        }
-
-//        val switch = findViewById<Switch>(R.id.localOrServer)
-//        switch.setOnCheckedChangeListener { buttonView, isChecked ->
-//            if (isChecked) {
-//                if (booksFragment.isVisible) {
-//                    Log.d(TAG, "booksFragment.isVisible(): ${booksFragment.isVisible()}")
-//                    buttonView.isChecked = false
-//                    onBackPressed()
-//                }
-//
-//            } else {
-//                if (token.isEmpty()) {
-//                    // Open the LoginActivity.
-//                    val intent = Intent(this, LoginActivity::class.java)
-//                    intent.putExtra("loginType", "books");
-//                    startActivityForResult(intent, 200)
-//
-//                    val needToLoginFragment = NeedToLoginFragment()
-//                    val fragmentTransaction = this.fragmentManager.beginTransaction()
-//                    fragmentTransaction.replace(R.id.container, needToLoginFragment, "needtologin_fragment")
-//                    fragmentTransaction.addToBackStack(null)
-//                    fragmentTransaction.commit()
-//                } else {
-//                    buttonView.isChecked = false
-//                    buttonView.text = getResources().getString(R.string.server_books)
-//                    booksFragment = ServerBooksFragment()
-//                    val fragmentTransaction = this.fragmentManager.beginTransaction()
-//
-//                    fragmentTransaction.replace(R.id.container, booksFragment, "server_books_fragment")
-//                    fragmentTransaction.addToBackStack(null)
-//                    fragmentTransaction.commit()
-//                }
-//            }
-//        }
-
-//        getBooks()
-
-        // HTTP GET /api/books
-//        val url = prefs.getString("url", "")
-//        Log.d(TAG, "url: $url")
-//        Fuel.get(url + "/api/books").responseString { request, response, result ->
-////            Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
-////            Log.d(TAG, "result.get().obj().get(results).class: ${result.get().obj().get("results").javaClass}")
-//            Log.d(TAG, "result: ${result}")
-////            return result.get().obj().get("resutls")
-//        }
-
-
     }
 
-    fun getBooks() {
-//        val prefs = activity.getSharedPreferences(activity.packageName + "_preferences", 0)
-        val url = prefs.getString("url", "")
-//        val token = prefs.getString("token", "")
-        Log.d(TAG, "getBooks token: $token")
-        Log.d(TAG, "getBooks url: $url")
-
-        FuelManager.instance.baseHeaders = mapOf("Authorization" to "Token " + token)
-
-        // HTTP GET /api/books
-        Fuel.get(url + "/api/books").responseJson { request, response, result ->
-            Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
-            Log.d(TAG, "result.get().obj().get(results).class: ${result.get().obj().get("results").javaClass}")
-            val books = result.get().obj().get("results") as JSONArray
-            val book = books[0] as JSONObject
-
-            Log.d(TAG, "item_book: ${book.get("title")}")
-//            for (i in 0..(books.length() - 1)) {
-//                val item_book = books.getJSONObject(i)
-//                // Your code here
-//            }
-
-//            return result.get().obj().get("resutls")
-        }
-    }
-
-    private fun getLastReadPositionAndSave() {
-
-        Thread(Runnable {
-            val lastReadChapterIndex = 12
-            val lastReadSpanIndex = "{\"usingId\":false,\"value\":21}"
-            Log.d(TAG, "getLastReadPositionAndSave thread lastReadChapterIndex: $lastReadChapterIndex")
-            folioReader?.setLastReadState(lastReadChapterIndex, lastReadSpanIndex)
-        }).start()
-    }
-
-    override fun saveLastReadState(lastReadChapterIndex: Int, lastReadSpanIndex: String) {
-
-        Toast.makeText(this, "lastReadChapterIndex = " + lastReadChapterIndex +
-                ", lastReadSpanIndex = " + lastReadSpanIndex, Toast.LENGTH_SHORT).show()
-        Log.d(TAG, "-> saveLastReadState -> lastReadChapterIndex = "
-                + lastReadChapterIndex + ", lastReadSpanIndex = " + lastReadSpanIndex)
-    }
-
-    /*
-     * For testing purpose, we are getting dummy highlights from asset. But you can get highlights from your server
-     * On success, you can save highlights to FolioReader DB.
-     */
-    private fun getHighlightsAndSave() {
-        Log.d(TAG, "highlighting...")
-//        Thread(Runnable {
-//            var highlightList: ArrayList<HighLight>? = null
-//            val objectMapper = ObjectMapper()
-//            try {
-//                highlightList = objectMapper.readValue(
-//                        loadAssetTextAsString("highlights/highlights_data.json"),
-//                        object : TypeReference<List<HighlightData>>() {
-//
-//                        })
-//            } catch (e: IOException) {
-//                e.printStackTrace()
-//            }
-//
-//            if (highlightList == null) {
-//                folioReader.saveReceivedHighLights(highlightList, OnSaveHighlight {
-//                    //You can do anything on successful saving highlight list
-//                })
-//            }
-//        }).start()
-    }
-
-    private fun loadAssetTextAsString(name: String): String? {
-        var `in`: BufferedReader? = null
-        try {
-            val buf = StringBuilder()
-            val `is` = assets.open(name)
-            `in` = BufferedReader(InputStreamReader(`is`))
-
-            var str: String
-            var isFirst = true
-//            while ((str = `in`!!.readLine()) != null) {
-//                if (isFirst)
-//                    isFirst = false
-//                else
-//                    buf.append('\n')
-//                buf.append(str)
-//            }
-            return buf.toString()
-        } catch (e: IOException) {
-            Log.e("HomeActivity", "Error opening asset $name")
-        } finally {
-            if (`in` != null) {
-                try {
-                    `in`!!.close()
-                } catch (e: IOException) {
-                    Log.e("HomeActivity", "Error closing asset $name")
-                }
-
-            }
-        }
-        return null
+    fun addFirst() {
+        val ed = prefs.edit()
+        ed.putBoolean("FIRSTRUN", true)
+        ed.commit()
+        dataSource.deleteBook("The Sign of Four")
     }
 
     override fun onDestroy() {
         super.onDestroy()
         folioReader?.unregisterHighlightListener()
         folioReader?.removeLastReadStateCallback()
-    }
-
-    fun onHighlight(highlight: HighLight, type: HighLight.HighLightAction) {
-        Toast.makeText(this,
-                "highlight id = " + highlight.uuid + " type = " + type,
-                Toast.LENGTH_SHORT).show()
     }
 
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
