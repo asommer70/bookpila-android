@@ -67,12 +67,6 @@ class LocalBooksAdapter(books: List<Book>): RecyclerView.Adapter<LocalBookViewHo
             fragmentTransaction.replace(R.id.container, bookFragment, "book_fragment")
             fragmentTransaction.addToBackStack(null)
             fragmentTransaction.commit()
-
-//            val intent = Intent(it.context, BookActivity::class.java)
-//            intent.putExtra("title", book.title)
-//            intent.putExtra("only_book", if (bookList!!.size == 1) true.toString() else false.toString())
-//            it.context.startActivity(intent)
-
         }
     }
 

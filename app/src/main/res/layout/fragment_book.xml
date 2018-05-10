@@ -46,7 +46,7 @@
     <TextView
         android:id="@+id/detailAbout"
         android:layout_width="214dp"
-        android:layout_height="164dp"
+        android:layout_height="364dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:textSize="16sp"

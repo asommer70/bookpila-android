@@ -62,13 +62,6 @@ class BooksAdapter(books: JSONArray): RecyclerView.Adapter<BookViewHolder>() {
         Glide.with(holder.itemView.context).load(book.get("cover_url")).into(holder.cover!!)
 
         holder.itemView.setOnClickListener {
-
-//            val intent = Intent(it.context, BookActivity::class.java)
-//            intent.putExtra("title", book.get("title").toString())
-//            intent.putExtra("only_book", false.toString())
-////            it.startActivityForResult(intent, 100)
-//            it.context.startActivity(intent)
-
             val bookFragment = BookFragment()
             val manager = (it.context as Activity).fragmentManager
             val fragmentTransaction = manager.beginTransaction()

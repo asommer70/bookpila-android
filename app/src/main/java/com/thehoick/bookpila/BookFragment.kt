@@ -144,7 +144,12 @@ class BookFragment: Fragment() {
                     currentLocFolio.put("lastReadChapterIndex", lastReadChapterIndex)
                     currentLocFolio.put("lastReadSpanIndex", JSONObject(lastReadSpanIndex))
                     localBook.current_loc_folio = currentLocFolio.toString()
-                    Log.d(TAG, "localBook.current_loc_folio: ${localBook.current_loc}")
+
+                    Log.d(TAG, "localBook.current_loc_folio: ${localBook.current_loc_folio}")
+
+                    // TODO:as check for network connectivity.
+                    // TODO:as check for token and update book on server.
+
                     dataSource.updateBook(localBook)
                 }
             })
