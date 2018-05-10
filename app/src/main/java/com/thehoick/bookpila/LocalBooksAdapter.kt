@@ -24,8 +24,8 @@ class LocalBookViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView) {
     init {
         title = itemView?.findViewById<TextView?>(R.id.title)
         cover = itemView?.findViewById<ImageView?>(R.id.cover)
-        about = itemView?.findViewById<TextView?>(R.id.about)
         author = itemView?.findViewById<TextView?>(R.id.author)
+        about = itemView?.findViewById<TextView?>(R.id.about)
     }
 }
 
@@ -49,8 +49,8 @@ class LocalBooksAdapter(books: List<Book>): RecyclerView.Adapter<LocalBookViewHo
     override fun onBindViewHolder(holder: LocalBookViewHolder, position: Int) {
         val book = bookList!![position]
         holder.title?.text = book.title
-        holder.author?.text = "Author: ${book.author}"
-        holder.about?.text = "About:\n ${book.about}"
+        holder.author!!.text = "Author: ${book.author}"
+        holder.about!!.text = "About:\n ${book.about}"
 
         Glide.with(holder.itemView.context).load(book.cover_url).into(holder.cover!!)
 
