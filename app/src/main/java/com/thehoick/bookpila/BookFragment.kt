@@ -2,6 +2,7 @@ package com.thehoick.bookpila
 
 //import kotlinx.android.synthetic.main.activity_main.*
 import android.app.Fragment
+import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -22,6 +23,11 @@ import com.thehoick.bookpila.models.Book
 import com.thehoick.bookpila.models.BookPilaDataSource
 import org.json.JSONObject
 import java.io.File
+import android.net.NetworkInfo
+import android.content.Context.CONNECTIVITY_SERVICE
+import android.net.ConnectivityManager
+import com.github.kittinunf.fuel.core.FuelManager
+import com.github.kittinunf.result.Result
 
 
 class BookFragment: Fragment() {
@@ -29,7 +35,7 @@ class BookFragment: Fragment() {
     val book = "BOOK"
     val only_book = "only_book"
     lateinit var tempFile: String
-    lateinit var localBook: Book
+    private var localBook: Book? = null
     private var folioReader: FolioReader? = null
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View {
@@ -65,10 +71,10 @@ class BookFragment: Fragment() {
 
         // Set button visibility based on Local or Server.
         val dataSource = BookPilaDataSource(context)
-        localBook = dataSource.getBook(book.get("title").toString())!!
+        localBook = dataSource.getBook(book.get("title").toString())
         Log.d(TAG, "fileExt: |${fileExt}|")
 
-        if (localBook._id != null || fileExt.equals("null") || !fileExt.equals("epub")) {
+        if (localBook?._id != null || fileExt.equals("null") || !fileExt.equals("epub")) {
             download.visibility = INVISIBLE
 
             if (fileExt.equals("null") || !fileExt.equals("epub")) {
@@ -123,7 +129,7 @@ class BookFragment: Fragment() {
             folioReader = FolioReader(context.applicationContext)
 
             // Retrieve and set last read location.
-            val currentLocFolio = JSONObject(localBook.current_loc_folio)
+            val currentLocFolio = JSONObject(localBook?.current_loc_folio)
             folioReader!!.setLastReadState(
                     currentLocFolio.get("lastReadChapterIndex") as Int,
                     currentLocFolio.get("lastReadSpanIndex").toString()
@@ -143,14 +149,36 @@ class BookFragment: Fragment() {
                     val currentLocFolio = JSONObject()
                     currentLocFolio.put("lastReadChapterIndex", lastReadChapterIndex)
                     currentLocFolio.put("lastReadSpanIndex", JSONObject(lastReadSpanIndex))
-                    localBook.current_loc_folio = currentLocFolio.toString()
+                    localBook?.current_loc_folio = currentLocFolio.toString()
+                    dataSource.updateBook(localBook!!)
 
-                    Log.d(TAG, "localBook.current_loc_folio: ${localBook.current_loc_folio}")
+                    Log.d(TAG, "localBook.current_loc_folio: ${localBook?.current_loc_folio}")
 
-                    // TODO:as check for network connectivity.
-                    // TODO:as check for token and update book on server.
+                    // Check for network connectivity.
+                    if (isNetworkOnline()) {
+                        // TODO:as check for token and update book on server.
+                        val url = prefs.getString("url", "")
+                        val token = prefs.getString("token", "")
+                        FuelManager.instance.baseHeaders = mapOf("Authorization" to "Token " + token)
 
-                    dataSource.updateBook(localBook)
+                        if (!token.isEmpty()) {
+                            Fuel.put(
+                                    "$url/api/books/${book.get("id")}",
+                                    localBook?.toList()
+                            ).response { request, response, result ->
+                                when (result) {
+                                    is Result.Failure -> {
+                                        val ex = result.getException()
+                                        Log.d(TAG, "Book: ${localBook?.title} NOT updated... ${ex.message}")
+                                    }
+                                    is Result.Success -> {
+                                        val data = result.get()
+                                        Log.d(TAG, "Book: ${localBook?.title} updated... ${response.statusCode}")
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             })
         }
@@ -161,5 +189,25 @@ class BookFragment: Fragment() {
         }
 
         return view
+    }
+
+    fun isNetworkOnline(): Boolean {
+        var status = false
+        try {
+            val cm = this.activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            var netInfo: NetworkInfo? = cm.getNetworkInfo(0)
+            if (netInfo != null && netInfo.state == NetworkInfo.State.CONNECTED) {
+                status = true
+            } else {
+                netInfo = cm.getNetworkInfo(1)
+                if (netInfo != null && netInfo.state == NetworkInfo.State.CONNECTED)
+                    status = true
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return false
+        }
+
+        return status
     }
 }

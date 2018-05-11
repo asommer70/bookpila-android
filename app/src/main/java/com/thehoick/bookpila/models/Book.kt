@@ -38,4 +38,16 @@ class Book (
             "updated_at": "$updated_at"
         }"""
     }
+
+    fun toList(): List<Pair<String, String>> {
+        return listOf(
+                "id" to this.id.toString(),
+                "title" to this.title.toString(),
+                "author" to this.author.toString(),
+                "about" to this.author.toString(),
+                "isbn" to this.isbn.toString(),
+                "current_loc" to this.current_loc.toString(),
+                "current_loc_folio" to this.current_loc_folio.toString()
+        )
+    }
 }
