@@ -2,16 +2,24 @@ package com.thehoick.bookpila
 
 import android.content.Intent
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.TextView
 import android.widget.Toast
 import com.folioreader.model.HighLight
 import com.folioreader.util.FolioReader
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.android.extension.responseJson
+import com.github.kittinunf.result.Result
 import com.thehoick.bookpila.models.BookPilaDataSource
+import org.json.JSONArray
 import org.json.JSONObject
 
 
@@ -21,6 +29,7 @@ class MainActivity : AppCompatActivity(), MainActivityView {
     lateinit var prefs: SharedPreferences
     lateinit var defaultTextView: TextView
     lateinit var token: String
+    lateinit var url: String
     lateinit var username: String
     lateinit var presenter: MainActivityPresenter
     lateinit var booksList: RecyclerView
@@ -34,8 +43,8 @@ class MainActivity : AppCompatActivity(), MainActivityView {
 
         prefs = this.getSharedPreferences(this.packageName + "_preferences", 0)
         defaultTextView = this.findViewById<TextView>(R.id.defaultTextView)
-
         token = prefs.getString("token", "")
+        url = prefs.getString("url", "")
 
         dataSource = BookPilaDataSource(this)
         val books = dataSource.getBooks()
@@ -126,6 +135,44 @@ class MainActivity : AppCompatActivity(), MainActivityView {
             editor.putInt("user_id", 0)
             editor.apply()
             finish()
+            true
+        }
+
+        R.id.sync -> {
+            // Get local books.
+            val localBooks = dataSource.getBooks()
+
+            // Get Server Books.
+            if (!url.isEmpty()) {
+                Fuel.get(url + "/api/books").responseJson { request, response, result ->
+                    Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
+
+                    when (result) {
+                        is Result.Failure -> {
+                            val ex = result.getException()
+                            Log.d(TAG, "Sync failed exception message: ${ex.message}")
+                        }
+                        is Result.Success -> {
+                            val serverBooks = result.get().obj().get("results") as JSONArray
+
+                            // Loop through the localBooks.
+                            for (localBook in localBooks) {
+                                // Check if the localBook is in the serverBooks.
+                                for (idx in 0..(serverBooks.length() - 1)) {
+                                    val serverBook = serverBooks[idx] as JSONObject
+                                    if (serverBook.get("title").toString().equals(localBook.title)) {
+                                        // If the localBook is in serverBooks check updated_at
+
+                                    }
+                                }
+
+
+                                // TODO:as if updated_at is newer than the localBook update the localBook.updated_at and localBook.current_loc_folio
+                            }
+                        }
+                    }
+                }
+            }
             true
         }
 

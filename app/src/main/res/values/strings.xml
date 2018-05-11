@@ -29,4 +29,5 @@
     <string name="getting_books">Getting books from server...</string>
     <string name="delete">Delete</string>
     <string name="server_network_problem">Network problem, or problem with the server...</string>
+    <string name="sync">Sync</string>
 </resources>
