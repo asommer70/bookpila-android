@@ -47,7 +47,8 @@ class Book (
                 "about" to this.author.toString(),
                 "isbn" to this.isbn.toString(),
                 "current_loc" to this.current_loc.toString(),
-                "current_loc_folio" to this.current_loc_folio.toString()
+                "current_loc_folio" to this.current_loc_folio.toString(),
+                "upadted_at" to this.updated_at.toString()
         )
     }
 }
