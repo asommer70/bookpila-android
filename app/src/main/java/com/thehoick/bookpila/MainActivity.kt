@@ -17,6 +17,7 @@ import com.folioreader.model.HighLight
 import com.folioreader.util.FolioReader
 import com.github.kittinunf.fuel.Fuel
 import com.github.kittinunf.fuel.android.extension.responseJson
+import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.result.Result
 import com.thehoick.bookpila.models.BookPilaDataSource
 import org.json.JSONArray
@@ -146,6 +147,7 @@ class MainActivity : AppCompatActivity(), MainActivityView {
 
             // Get Server Books.
             if (!url.isEmpty()) {
+                FuelManager.instance.baseHeaders = mapOf("Authorization" to "Token " + token)
                 Fuel.get(url + "/api/books").responseJson { request, response, result ->
                     Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
 
@@ -167,11 +169,15 @@ class MainActivity : AppCompatActivity(), MainActivityView {
 //                                        val localBook.updatedAt =  SimpleDateFormat.parse(localBook.updated_at)
                                         val tz = TimeZone.getDefault().getID()
                                         val tzOffset = TimeZone.getDefault().rawOffset
+                                        Log.d(TAG, "tz: $tz, tzOffset: $tzOffset")
+                                        Log.d(TAG, "localBook.updated_at: ${localBook.updated_at}, serverBook.updated_at: ${serverBook.get("updated_at")}")
                                         val localUpdatedAt = SimpleDateFormat("MMM dd HH:mm:ss $tz yyyy").parse(localBook.updated_at)
                                         val serverUpdatedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss-$tzOffset")
                                                     .parse(serverBook.get("updated_at").toString())
                                         // localBook: Fri May 11 11:50:48 EDT 2018
                                         // serverBook: 2018-05-11T11:50:50.743213-04:00
+                                        // tz: America/New_York, tzOffset: -18000000
+                                        // localBook.updated_at: Fri May 11 11:50:48 EDT 2018, serverBook.updated_at: 2018-05-11T11:50:50.743213-04:00
                                         Log.d(TAG, "localUpdatedAt: $localUpdatedAt, serverUpdatedAt: $serverUpdatedAt")
                                     }
                                 }
