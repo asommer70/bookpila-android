@@ -21,6 +21,8 @@ import com.github.kittinunf.result.Result
 import com.thehoick.bookpila.models.BookPilaDataSource
 import org.json.JSONArray
 import org.json.JSONObject
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class MainActivity : AppCompatActivity(), MainActivityView {
@@ -161,8 +163,16 @@ class MainActivity : AppCompatActivity(), MainActivityView {
                                 for (idx in 0..(serverBooks.length() - 1)) {
                                     val serverBook = serverBooks[idx] as JSONObject
                                     if (serverBook.get("title").toString().equals(localBook.title)) {
-                                        // If the localBook is in serverBooks check updated_at
-
+                                        // If the localBook is in serverBooks check updated_at.
+//                                        val localBook.updatedAt =  SimpleDateFormat.parse(localBook.updated_at)
+                                        val tz = TimeZone.getDefault().getID()
+                                        val tzOffset = TimeZone.getDefault().rawOffset
+                                        val localUpdatedAt = SimpleDateFormat("MMM dd HH:mm:ss $tz yyyy").parse(localBook.updated_at)
+                                        val serverUpdatedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss-$tzOffset")
+                                                    .parse(serverBook.get("updated_at").toString())
+                                        // localBook: Fri May 11 11:50:48 EDT 2018
+                                        // serverBook: 2018-05-11T11:50:50.743213-04:00
+                                        Log.d(TAG, "localUpdatedAt: $localUpdatedAt, serverUpdatedAt: $serverUpdatedAt")
                                     }
                                 }
 
@@ -197,6 +207,7 @@ class MainActivity : AppCompatActivity(), MainActivityView {
         if (!token.equals("") && !username.equals("")) {
             menu.clear()
             menu.add(0, R.id.username, Menu.NONE, "Welcome, " + username)
+            menu.add(0, R.id.sync, Menu.NONE, "Sync")
             menu.add(0, R.id.logout, Menu.NONE, "Logout")
             menu.add(0, R.id.settings, Menu.NONE, "Settings")
         } else {
