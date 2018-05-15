@@ -29,6 +29,7 @@ import android.net.ConnectivityManager
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.result.Result
 import java.sql.Date
+import java.sql.Timestamp
 import java.util.*
 
 
@@ -152,7 +153,8 @@ class BookFragment: Fragment() {
                     currentLocFolio.put("lastReadChapterIndex", lastReadChapterIndex)
                     currentLocFolio.put("lastReadSpanIndex", JSONObject(lastReadSpanIndex))
                     localBook?.current_loc_folio = currentLocFolio.toString()
-                    localBook?.updated_at = Date().toString()
+//                    localBook?.updated_at = Date().toString()
+                    localBook?.updated_at = Timestamp(System.currentTimeMillis()).toString()
                     dataSource.updateBook(localBook!!)
 
                     Log.d(TAG, "localBook.current_loc_folio: ${localBook?.current_loc_folio}")

@@ -23,6 +23,7 @@ import com.thehoick.bookpila.models.BookPilaDataSource
 import org.json.JSONArray
 import org.json.JSONObject
 import java.text.SimpleDateFormat
+import java.time.ZoneId
 import java.util.*
 
 
@@ -149,8 +150,6 @@ class MainActivity : AppCompatActivity(), MainActivityView {
             if (!url.isEmpty()) {
                 FuelManager.instance.baseHeaders = mapOf("Authorization" to "Token " + token)
                 Fuel.get(url + "/api/books").responseJson { request, response, result ->
-                    Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
-
                     when (result) {
                         is Result.Failure -> {
                             val ex = result.getException()
@@ -166,24 +165,21 @@ class MainActivity : AppCompatActivity(), MainActivityView {
                                     val serverBook = serverBooks[idx] as JSONObject
                                     if (serverBook.get("title").toString().equals(localBook.title)) {
                                         // If the localBook is in serverBooks check updated_at.
-//                                        val localBook.updatedAt =  SimpleDateFormat.parse(localBook.updated_at)
-                                        val tz = TimeZone.getDefault().getID()
-                                        val tzOffset = TimeZone.getDefault().rawOffset
-                                        Log.d(TAG, "tz: $tz, tzOffset: $tzOffset")
-                                        Log.d(TAG, "localBook.updated_at: ${localBook.updated_at}, serverBook.updated_at: ${serverBook.get("updated_at")}")
-                                        val localUpdatedAt = SimpleDateFormat("MMM dd HH:mm:ss $tz yyyy").parse(localBook.updated_at)
-                                        val serverUpdatedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss-$tzOffset")
-                                                    .parse(serverBook.get("updated_at").toString())
-                                        // localBook: Fri May 11 11:50:48 EDT 2018
-                                        // serverBook: 2018-05-11T11:50:50.743213-04:00
-                                        // tz: America/New_York, tzOffset: -18000000
-                                        // localBook.updated_at: Fri May 11 11:50:48 EDT 2018, serverBook.updated_at: 2018-05-11T11:50:50.743213-04:00
-                                        Log.d(TAG, "localUpdatedAt: $localUpdatedAt, serverUpdatedAt: $serverUpdatedAt")
+                                        if (!localBook.current_loc_folio.equals(serverBook.get("current_loc_folio").toString())) {
+                                            val localUpdatedAt = SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(localBook.updated_at)
+                                            val serverUpdatedAt = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss").parse(serverBook.get("updated_at").toString())
+                                            val diff = Math.abs(localUpdatedAt.getTime()/60000 - serverUpdatedAt.getTime()/60000)
+
+                                            // If updated_at is newer than the localBook update the localBook.updated_at and localBook.current_loc_folio
+                                            if (diff > 1) {
+                                                localBook.updated_at = serverBook.get("updated_at").toString()
+                                                localBook.current_loc_folio = serverBook.get("current_loc_folio").toString()
+                                                dataSource.updateBook(localBook)
+                                            }
+                                        }
                                     }
                                 }
 
-
-                                // TODO:as if updated_at is newer than the localBook update the localBook.updated_at and localBook.current_loc_folio
                             }
                         }
                     }
