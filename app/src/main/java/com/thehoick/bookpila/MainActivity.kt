@@ -1,5 +1,6 @@
 package com.thehoick.bookpila
 
+import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -49,8 +50,15 @@ class MainActivity : AppCompatActivity(), MainActivityView {
         defaultTextView = this.findViewById<TextView>(R.id.defaultTextView)
         token = prefs.getString("token", "")
         url = prefs.getString("url", "")
-
         dataSource = BookPilaDataSource(this)
+
+        // Open the last Book if it's in SharedPrefs.
+        val lastTitle = prefs.getString("last_book", "")
+        if (!lastTitle.isEmpty()) {
+            val localBook = dataSource.getBook(lastTitle)
+            localBook?.read(this)
+        }
+
         val books = dataSource.getBooks()
 
         // Return savedFragment, or create a new localBooksFragment.
@@ -176,6 +184,23 @@ class MainActivity : AppCompatActivity(), MainActivityView {
                                                 localBook.updated_at = serverBook.get("updated_at").toString()
                                                 localBook.current_loc_folio = serverBook.get("current_loc_folio").toString()
                                                 dataSource.updateBook(localBook)
+                                            } else {
+                                                // Update Book on Server.
+                                                Fuel.put(
+                                                        "$url/api/books/${localBook.id}",
+                                                        localBook.toList()
+                                                ).response { request, response, result ->
+                                                    when (result) {
+                                                        is Result.Failure -> {
+                                                            val ex = result.getException()
+                                                            Log.d(TAG, "Book: ${localBook.title} NOT updated... ${ex.message}")
+                                                        }
+                                                        is Result.Success -> {
+                                                            val data = result.get()
+                                                            Log.d(TAG, "Book: ${localBook.title} updated... ${response.statusCode}")
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
                                     }
@@ -233,5 +258,13 @@ class MainActivity : AppCompatActivity(), MainActivityView {
         intent.putExtra("loginType", "photos");
         startActivityForResult(intent, 100)
     }
+
+//    override fun onPause() {
+//        super.onPause()
+//
+//        val editor = prefs.edit()
+//        editor.putString("lastActivity", javaClass.name)
+//        editor.apply()
+//    }
 
 }

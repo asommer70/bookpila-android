@@ -157,73 +157,7 @@ class BookFragment: Fragment() {
         read.setOnClickListener {
             Log.d(TAG, "Read ${book.get("title")}...")
 
-            val config = Config.ConfigBuilder()
-                    .nightmode(true)
-                    .fontSize(1)
-                    .setShowTts(false)
-                    .font(FONT_RALEWAY)
-                    .themeColor(R.color.pink)
-                    .build()
-
-            folioReader = FolioReader(context.applicationContext)
-
-            // Retrieve and set last read location.
-            if (!localBook!!.current_loc_folio!!.isEmpty()) {
-                val currentLocFolio = JSONObject(localBook?.current_loc_folio)
-                folioReader!!.setLastReadState(
-                        currentLocFolio.get("lastReadChapterIndex") as Int,
-                        currentLocFolio.get("lastReadSpanIndex").toString()
-                )
-            }
-
-            if (book.get("title").toString().equals("The Sign of Four")) {
-                Log.d(TAG, "opening: file://${book.get("local_path")}")
-                folioReader?.openBook("file://${book.get("local_path").toString()}", config)
-            } else {
-                folioReader?.openBook("${book.get("local_path").toString()}", config)
-            }
-
-
-            folioReader?.setLastReadStateCallback(object : LastReadStateCallback {
-                override fun saveLastReadState(lastReadChapterIndex: Int, lastReadSpanIndex: String?) {
-                    // Save lastReadChapterIndex and lastReadSpanIndex to the local database.
-                    val currentLocFolio = JSONObject()
-                    currentLocFolio.put("lastReadChapterIndex", lastReadChapterIndex)
-                    currentLocFolio.put("lastReadSpanIndex", JSONObject(lastReadSpanIndex))
-                    localBook?.current_loc_folio = currentLocFolio.toString()
-//                    localBook?.updated_at = Date().toString()
-                    localBook?.updated_at = Timestamp(System.currentTimeMillis()).toString()
-                    dataSource.updateBook(localBook!!)
-
-                    Log.d(TAG, "localBook.current_loc_folio: ${localBook?.current_loc_folio}")
-
-                    // Check for network connectivity.
-                    if (isNetworkOnline()) {
-                        // TODO:as check for token and update book on server.
-                        val url = prefs.getString("url", "")
-                        val token = prefs.getString("token", "")
-                        FuelManager.instance.baseHeaders = mapOf("Authorization" to "Token " + token)
-
-                        if (!token.isEmpty()) {
-                            Fuel.put(
-                                    "$url/api/books/${book.get("id")}",
-                                    localBook?.toList()
-                            ).response { request, response, result ->
-                                when (result) {
-                                    is Result.Failure -> {
-                                        val ex = result.getException()
-                                        Log.d(TAG, "Book: ${localBook?.title} NOT updated... ${ex.message}")
-                                    }
-                                    is Result.Success -> {
-                                        val data = result.get()
-                                        Log.d(TAG, "Book: ${localBook?.title} updated... ${response.statusCode}")
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            })
+            localBook?.read(context)
         }
 
         delete.setOnClickListener {
