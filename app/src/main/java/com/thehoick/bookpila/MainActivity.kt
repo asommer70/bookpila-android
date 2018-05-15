@@ -90,6 +90,7 @@ class MainActivity : AppCompatActivity(), MainActivityView {
                     "cover_url" to "/android_asset/books/The_Sign_of_Four_cover_1892.jpg",
                     "local_filename" to "the_sign_of_four.epub",
                     "local_path" to "/android_asset/books/the_sign_of_four.epub",
+                    "local_cover" to "/android_asset/books/The_Sign_of_Four_cover_1892.jpg",
                     "created_at" to "",
                     "updated_at" to ""
 

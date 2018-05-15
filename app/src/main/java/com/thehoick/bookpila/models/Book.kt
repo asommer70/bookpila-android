@@ -15,10 +15,15 @@ class Book (
         val cover_url: String?,
         var local_filename: String?,
         var local_path: String?,
+        var local_cover: String?,
         val created_at: String?,
         var updated_at: String?
 ) {
     override fun toString(): String {
+        var currentLocFolio: String = "\" \""
+        if (!current_loc_folio!!.isEmpty()) {
+            currentLocFolio = current_loc_folio!!
+        }
         return """{
             "_id": $_id,
             "id": $id,
@@ -28,12 +33,13 @@ class Book (
             "isbn": "$isbn",
             "upload": "$upload",
             "current_loc": "$current_loc",
-            "current_loc_folio": $current_loc_folio,
+            "current_loc_folio": $currentLocFolio,
             "cover": "$cover",
             "cover_image": "$cover_image",
             "cover_url": "$cover_url",
             "local_filename": "$local_filename",
             "local_path": "$local_path",
+            "local_cover": "$local_cover",
             "created_at": "$created_at",
             "updated_at": "$updated_at"
         }"""

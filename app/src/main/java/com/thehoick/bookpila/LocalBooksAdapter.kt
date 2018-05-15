@@ -2,6 +2,7 @@ package com.thehoick.bookpila
 
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.widget.RecyclerView
 import android.util.Log
@@ -13,6 +14,10 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.thehoick.bookpila.models.Book
 import org.json.JSONObject
+import java.io.File
+import com.thehoick.bookpila.R.xml.preferences
+
+
 
 class LocalBookViewHolder(itemView: View?): RecyclerView.ViewHolder(itemView) {
     val TAG = BookViewHolder::class.java.simpleName
@@ -52,7 +57,8 @@ class LocalBooksAdapter(books: List<Book>): RecyclerView.Adapter<LocalBookViewHo
         holder.author!!.text = "Author: ${book.author}"
         holder.about!!.text = "About:\n ${book.about}"
 
-        Glide.with(holder.itemView.context).load(book.cover_url).into(holder.cover!!)
+        val coverUri = Uri.fromFile(File(book.local_cover))
+        Glide.with(holder.itemView.context).load(coverUri).into(holder.cover!!)
 
         holder.itemView.setOnClickListener {
             val bookFragment = BookFragment()

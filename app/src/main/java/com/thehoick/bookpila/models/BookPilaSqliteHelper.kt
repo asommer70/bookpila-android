@@ -25,6 +25,7 @@ class BookPilaSqliteHelper(context: Context): SQLiteOpenHelper(context, DB_NAME,
                 cover_url text,
                 local_filename text,
                 local_path text,
+                local_cover text,
                 created_at text,
                 updated_at text
             );

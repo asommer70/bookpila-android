@@ -26,6 +26,7 @@ import java.io.File
 import android.net.NetworkInfo
 import android.content.Context.CONNECTIVITY_SERVICE
 import android.net.ConnectivityManager
+import android.net.Uri
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.result.Result
 import java.sql.Date
@@ -38,6 +39,7 @@ class BookFragment: Fragment() {
     val book = "BOOK"
     val only_book = "only_book"
     lateinit var tempFile: String
+    lateinit var coverTempFile: String
     private var localBook: Book? = null
     private var folioReader: FolioReader? = null
 
@@ -56,7 +58,10 @@ class BookFragment: Fragment() {
 
         val fileName = book.get("upload").toString().split("/").last().split(".").first()
         val fileExt = book.get("upload").toString().split("/").last().split(".").last()
+        val coverFileName = book.get("cover_url").toString().split("/").last().split(".").first()
+        val coverFileExt = book.get("cover_url").toString().split("/").last().split(".").last()
         Log.d(TAG, "fileName: $fileName, fileExt: $fileExt |")
+        Log.d(TAG, "coverFileName: $coverFileName, coverFileExt: $coverFileExt |")
 
 
         val title = view.findViewById<TextView>(R.id.detailTitle)
@@ -70,7 +75,6 @@ class BookFragment: Fragment() {
         title.text = book.get("title").toString()
         author.text = "Author: ${book.get("author")}"
         about.text = "About:\n ${book.get("about")}"
-        Glide.with(view.context).load(book.get("cover_url").toString()).into(cover)
 
         // Set button visibility based on Local or Server.
         val dataSource = BookPilaDataSource(context)
@@ -78,6 +82,7 @@ class BookFragment: Fragment() {
         Log.d(TAG, "fileExt: |${fileExt}|")
 
         if (localBook?._id != null || fileExt.equals("null") || !fileExt.equals("epub")) {
+            Glide.with(view.context).load(Uri.fromFile(File(localBook?.local_cover))).into(cover)
             download.visibility = INVISIBLE
 
             if (fileExt.equals("null") || !fileExt.equals("epub")) {
@@ -88,6 +93,7 @@ class BookFragment: Fragment() {
                 delete.visibility = INVISIBLE
             }
         } else {
+            Glide.with(view.context).load(book.get("cover_url").toString()).into(cover)
             read.visibility = INVISIBLE
             delete.visibility = INVISIBLE
         }
@@ -110,11 +116,41 @@ class BookFragment: Fragment() {
                 // Save book data into a local SQL database.
                 book.put("local_filename", "$fileName.epub")
                 book.put("local_path", "$localDir/$fileName.epub")
+                book.put("local_cover", " ")
                 dataSource.createBook(book as JSONObject)
 
                 File(tempFile).renameTo(File("$localDir/$fileName.epub"))
 
-                this.fragmentManager.popBackStackImmediate()
+//                this.fragmentManager.popBackStackImmediate()
+                val coverDir = File(localDir + "/covers")
+                if (!coverDir.exists()) {
+                    try {
+                        coverDir.mkdir()
+                    } catch (se: SecurityException) {
+                        //handle it
+                        Log.d(TAG, "Could not create $localDir/covers...")
+                    }
+                }
+
+                Fuel.download(book.get("cover_url").toString()).destination { response, url ->
+                    val coverTemp = File.createTempFile(coverFileName, coverFileExt, File(localDir + "/covers"))
+                    coverTempFile = coverTemp.absolutePath
+
+                    coverTemp
+                }.response { req, res, result ->
+                    Log.d(TAG, "cover file downloaded...")
+
+                    download.visibility = INVISIBLE
+
+                    // Save book cover location.
+                    val localBook = dataSource.getBook(book.get("title").toString())
+                    localBook?.local_cover = "$localDir/covers/$coverFileName.$coverFileExt"
+                    dataSource.updateBook(localBook!!)
+
+                    File(coverTempFile).renameTo(File("$localDir/covers/$coverFileName.$coverFileExt"))
+
+                    this.fragmentManager.popBackStackImmediate()
+                }
             }
         }
 
@@ -132,11 +168,13 @@ class BookFragment: Fragment() {
             folioReader = FolioReader(context.applicationContext)
 
             // Retrieve and set last read location.
-            val currentLocFolio = JSONObject(localBook?.current_loc_folio)
-            folioReader!!.setLastReadState(
-                    currentLocFolio.get("lastReadChapterIndex") as Int,
-                    currentLocFolio.get("lastReadSpanIndex").toString()
-            )
+            if (!localBook!!.current_loc_folio!!.isEmpty()) {
+                val currentLocFolio = JSONObject(localBook?.current_loc_folio)
+                folioReader!!.setLastReadState(
+                        currentLocFolio.get("lastReadChapterIndex") as Int,
+                        currentLocFolio.get("lastReadSpanIndex").toString()
+                )
+            }
 
             if (book.get("title").toString().equals("The Sign of Four")) {
                 Log.d(TAG, "opening: file://${book.get("local_path")}")
