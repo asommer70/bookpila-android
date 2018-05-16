@@ -114,7 +114,11 @@ class Book (
                 // Save lastReadChapterIndex and lastReadSpanIndex to the local database.
                 val currentLocFolio = JSONObject()
                 currentLocFolio.put("lastReadChapterIndex", lastReadChapterIndex)
-                currentLocFolio.put("lastReadSpanIndex", JSONObject(lastReadSpanIndex))
+                if (lastReadSpanIndex!!.isEmpty()) {
+                    currentLocFolio.put("lastReadSpanIndex", "")
+                } else {
+                    currentLocFolio.put("lastReadSpanIndex", JSONObject(lastReadSpanIndex))
+                }
                 localBook.current_loc_folio = currentLocFolio.toString()
                 localBook.updated_at = Timestamp(System.currentTimeMillis()).toString()
                 dataSource.updateBook(localBook)
