@@ -54,8 +54,6 @@ class ServerBooksFragment: Fragment() {
 
         // HTTP GET /api/books
         Fuel.get(url + "/api/books").responseJson { request, response, result ->
-            Log.d(TAG, "result.get().obj().get(results): ${result.get().obj().get("results")}")
-
             when (result) {
                 is Result.Failure -> {
                     message.text = getString(R.string.server_network_problem)

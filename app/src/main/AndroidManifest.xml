@@ -23,7 +23,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.folioreader.ui.folio.activity.FolioActivity" />
+            android:name="com.folioreader.ui.folio.activity.FolioActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity android:name=".LoginActivity" />
     </application>
 

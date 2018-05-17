@@ -1,5 +1,6 @@
 package com.thehoick.bookpila.models
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
 import com.folioreader.Config
@@ -79,6 +80,8 @@ class Book (
     }
 
     fun read(context: Context) {
+//        activity?.actionBar?.hide()
+
         val config = Config.ConfigBuilder()
                 .nightmode(true)
                 .fontSize(1)
@@ -111,6 +114,7 @@ class Book (
 
         folioReader.setLastReadStateCallback(object : LastReadStateCallback {
             override fun saveLastReadState(lastReadChapterIndex: Int, lastReadSpanIndex: String?) {
+                Log.d(TAG, "lastReadChapterIndex: $lastReadChapterIndex, lastReadSpanIndex: $lastReadSpanIndex")
                 // Save lastReadChapterIndex and lastReadSpanIndex to the local database.
                 val currentLocFolio = JSONObject()
                 currentLocFolio.put("lastReadChapterIndex", lastReadChapterIndex)

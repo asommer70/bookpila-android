@@ -27,6 +27,7 @@ import android.net.NetworkInfo
 import android.content.Context.CONNECTIVITY_SERVICE
 import android.net.ConnectivityManager
 import android.net.Uri
+import android.view.Window
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.result.Result
 import java.sql.Date
@@ -156,7 +157,8 @@ class BookFragment: Fragment() {
 
         read.setOnClickListener {
             Log.d(TAG, "Read ${book.get("title")}...")
-
+//            activity.getWindow().requestFeature(Window.FEATURE_ACTION_BAR)
+//            activity.getActionBar().hide()
             localBook?.read(context)
         }
 
@@ -168,23 +170,23 @@ class BookFragment: Fragment() {
         return view
     }
 
-    fun isNetworkOnline(): Boolean {
-        var status = false
-        try {
-            val cm = this.activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-            var netInfo: NetworkInfo? = cm.getNetworkInfo(0)
-            if (netInfo != null && netInfo.state == NetworkInfo.State.CONNECTED) {
-                status = true
-            } else {
-                netInfo = cm.getNetworkInfo(1)
-                if (netInfo != null && netInfo.state == NetworkInfo.State.CONNECTED)
-                    status = true
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return false
-        }
-
-        return status
-    }
+    //    fun isNetworkOnline(): Boolean {
+//        var status = false
+//        try {
+//            val cm = this.activity.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+//            var netInfo: NetworkInfo? = cm.getNetworkInfo(0)
+//            if (netInfo != null && netInfo.state == NetworkInfo.State.CONNECTED) {
+//                status = true
+//            } else {
+//                netInfo = cm.getNetworkInfo(1)
+//                if (netInfo != null && netInfo.state == NetworkInfo.State.CONNECTED)
+//                    status = true
+//            }
+//        } catch (e: Exception) {
+//            e.printStackTrace()
+//            return false
+//        }
+//
+//        return status
+//    }
 }

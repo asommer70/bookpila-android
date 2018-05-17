@@ -59,8 +59,6 @@ class MainActivity : AppCompatActivity(), MainActivityView {
             localBook?.read(this)
         }
 
-        val books = dataSource.getBooks()
-
         // Return savedFragment, or create a new localBooksFragment.
         val savedFragment = fragmentManager.findFragmentById(R.id.container)
         if (savedFragment == null) {
@@ -111,7 +109,7 @@ class MainActivity : AppCompatActivity(), MainActivityView {
     fun addFirst() {
         val ed = prefs.edit()
         ed.putBoolean("FIRSTRUN", true)
-        ed.commit()
+        ed.apply()
         dataSource.deleteBook("The Sign of Four")
     }
 
