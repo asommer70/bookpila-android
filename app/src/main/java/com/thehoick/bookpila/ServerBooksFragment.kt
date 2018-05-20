@@ -65,6 +65,75 @@ class ServerBooksFragment: Fragment() {
                     books = result.get().obj().get("results") as JSONArray
                     val booksList = view.findViewById<RecyclerView>(R.id.booksList)
                     booksAdapter = BooksAdapter(books)
+
+
+//                    val layoutManager: LinearLayoutManager = LinearLayoutManager(activity)
+//                    val layoutManager = RecyclerView.LayoutManager()
+//                    val layoutManager = view.getL
+//                    booksList.setLayoutManager(layoutManager)
+
+                    // TODO:as set totalItemCount and pos here.
+
+                    booksList.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                        override fun onScrolled(recyclerView: RecyclerView?, dx: Int, dy: Int) {
+                            // Check for down scroll.
+//                            if (dy > 0) {
+                            val layoutManager = booksList.layoutManager
+                            var pastVisiblesItems: Int
+                            var visibleItemCount: Int
+                            var totalItemCount: Int
+                            var loading = true
+                            Log.d(TAG, "dx: $dx, dy: $dy")
+                                visibleItemCount = layoutManager.getChildCount()
+                                totalItemCount = layoutManager.getItemCount()
+//                                pastVisiblesItems = layoutManager.findFirstVisibleItemPosition()
+//                                val currentPosition = layoutManager.getPosition(layoutManager.focusedChild)
+//                            recyclerView.getChildAt(0).getTop() == 0
+
+                            val linearLayoutManager = layoutManager as LinearLayoutManager
+                            val pos = linearLayoutManager.findLastVisibleItemPosition()
+//                            val lastChildBottom = linearLayoutManager.findViewByPosition(pos).bottom
+//                            Log.d(TAG, "pos: $pos, lastChildBottom: $lastChildBottom")
+//                            if (lastChildBottom == booksList.getHeight() - booksList.getPaddingBottom() && pos == totalItemCount - 1) {
+//                                Log.d(TAG, "At the bottom...")
+//                            }
+
+                            if (pos == totalItemCount - 1) {
+                                val nextUrl = result.get().obj().get("next").toString()
+                                Log.d(TAG, "At the bottom... nextUrl: $nextUrl")
+
+                                if (nextUrl != "null") {
+                                    // Get more books.
+                                    Fuel.get(nextUrl).responseJson { request, response, result ->
+                                        val newBooks = result.get().obj().get("results") as JSONArray
+                                        for (i in 0..(newBooks.length() - 1)) {
+                                            booksAdapter?.bookList?.put(newBooks[i])
+                                        }
+                                        booksAdapter?.notifyDataSetChanged()
+                                    }
+                                }
+                            }
+
+//                                val lastChild = booksList.getChildAt(totalItemCount)
+//                                Log.d(TAG, "lastChild: $lastChild")
+//                                if (lastChild != null && lastChild.isFocused) {
+//                                    Log.d(TAG, "At the end...")
+//                                }
+//                            val pos = layoutManager.getPosition()
+
+//                                if (loading) {
+//                                    Log.d(TAG, "visibleItemCount: $visibleItemCount, pastVisiblesItems: $pastVisiblesItems, totalItemCount: $totalItemCount")
+//                            Log.d(TAG, "visibleItemCount: $visibleItemCount, totalItemCount: $totalItemCount")
+//                            if (visibleItemCount >= totalItemCount) {
+//                                        loading = false
+//                                        Log.d(TAG, "Final book...")
+//
+//                                    }
+//                                }
+//                            }
+                        }
+                    })
+
                     booksList.setLayoutManager(LinearLayoutManager(context))
                     booksList.adapter = booksAdapter
                 }

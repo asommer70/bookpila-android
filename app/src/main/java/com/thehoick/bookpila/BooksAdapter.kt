@@ -44,10 +44,6 @@ class BooksAdapter(books: JSONArray): RecyclerView.Adapter<BookViewHolder>() {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BookViewHolder {
         val itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_book, parent, false)
 
-//        itemView.setOnClickListener {
-//
-//        }
-
         return BookViewHolder(itemView)
     }
 
