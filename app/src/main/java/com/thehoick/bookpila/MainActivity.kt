@@ -53,11 +53,11 @@ class MainActivity : AppCompatActivity(), MainActivityView {
         dataSource = BookPilaDataSource(this)
 
         // Open the last Book if it's in SharedPrefs.
-        val lastTitle = prefs.getString("last_book", "")
-        if (!lastTitle.isEmpty()) {
-            val localBook = dataSource.getBook(lastTitle)
-            localBook?.read(this)
-        }
+//        val lastTitle = prefs.getString("last_book", "")
+//        if (!lastTitle.isEmpty()) {
+//            val localBook = dataSource.getBook(lastTitle)
+//            localBook?.read(this)
+//        }
 
         // Return savedFragment, or create a new localBooksFragment.
         val savedFragment = fragmentManager.findFragmentById(R.id.container)
