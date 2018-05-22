@@ -129,7 +129,7 @@ class BookPilaDataSource(context: Context) {
                 null,
                 null,
                 null,
-                null
+                "updated_at desc"
         )
 
         val books = arrayListOf<Book>()
